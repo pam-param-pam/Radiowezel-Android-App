@@ -1,6 +1,8 @@
 package dev.pamparampam.myapplication.login;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -8,12 +10,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -29,6 +34,7 @@ import dev.pamparampam.myapplication.R;
 
 import dev.pamparampam.myapplication.login.helper.Functions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -45,30 +51,59 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialButton btnChangePass, btnLogout;
 
     private HashMap<String,String> user = new HashMap<>();
-
+    private RecyclerView recyclerView;
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        TextView txtName = findViewById(R.id.name);
-        TextView txtEmail = findViewById(R.id.email);
+
         btnChangePass = findViewById(R.id.change_password);
         btnLogout = findViewById(R.id.logout);
 
 
+        recyclerView = findViewById(R.id.recycler_view);
 
-        // session manager
+        ArrayList<String> arrayList=new ArrayList<>();
+        arrayList.add("Don't care");
+        arrayList.add("Didn't ask");
+        arrayList.add("Ratio");
+        arrayList.add("Counter ratio");
+        arrayList.add("Skill issue");
+        arrayList.add("Cry about it");
+        arrayList.add("Pinged owner");
+        arrayList.add("Seethe");
+        arrayList.add("Mald");
+        arrayList.add("Fatherless");
+        arrayList.add("Stfu");
+        arrayList.add("No life");
+        arrayList.add("Touch grass");
+        arrayList.add("Cancelled");
+        arrayList.add("Denied");
+        arrayList.add("Exposed");
+        arrayList.add("Rat");
+        arrayList.add("Back pilled");
+        arrayList.add("Stay bad");
+        arrayList.add("Blocked");
+        arrayList.add("Stay mad");
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_list_item_1,
+                arrayList );
+
+
+        String s1[] = getResources().getStringArray(R.array.music_titles);
+        String s2[] = getResources().getStringArray(R.array.music_desc);
+        int images[] = {R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
+        MyAdapter myAdapter = new MyAdapter(this, s1, s2, images);
+        recyclerView.setAdapter(myAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
 
-        // Fetching user details from database
-        String name = user.get("name");
-        String email = user.get("email");
 
-        // Displaying the user details on the screen
-        txtName.setText(name);
-        txtEmail.setText(email);
 
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -146,6 +181,13 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void logoutUser() {
+        SharedPreferences sp = getSharedPreferences("login",MODE_PRIVATE);
+
+        sp.edit().putBoolean("logged",false).apply();
+
+        Intent switchActivityIntent = new Intent(this, LoginActivity.class);
+        finish();
+        startActivity(switchActivityIntent);
 
     }
 

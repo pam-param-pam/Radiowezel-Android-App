@@ -2,6 +2,7 @@ package dev.pamparampam.myapplication.login;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -48,20 +49,33 @@ public class LoginActivity extends AppCompatActivity {
 
     private MaterialButton btnLogin, btnLinkToRegister, btnForgotPass;
     private TextInputLayout inputEmail, inputPassword;
+    SharedPreferences sp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        sp = getSharedPreferences("login",MODE_PRIVATE);
 
-        inputEmail = findViewById(R.id.edit_email);
-        inputPassword = findViewById(R.id.edit_password);
-        btnLogin = findViewById(R.id.button_login);
-        btnLinkToRegister = findViewById(R.id.button_register);
-        btnForgotPass = findViewById(R.id.button_reset);
+        if(sp.getBoolean("logged",false)){
 
-        init();
+
+            Intent switchActivityIntent = new Intent(this, HomeActivity.class);
+            startActivity(switchActivityIntent);
+        }
+        else {
+
+            setContentView(R.layout.activity_login);
+
+            inputEmail = findViewById(R.id.edit_email);
+            inputPassword = findViewById(R.id.edit_password);
+            btnLogin = findViewById(R.id.button_login);
+            btnLinkToRegister = findViewById(R.id.button_register);
+            btnForgotPass = findViewById(R.id.button_reset);
+
+            init();
+        }
+
     }
 
     private void init() {
@@ -155,6 +169,9 @@ public class LoginActivity extends AppCompatActivity {
 
 
         showDialog("Logging in ...");
+
+        sp.edit().putBoolean("logged",true).apply();
+
         Intent switchActivityIntent = new Intent(this, HomeActivity.class);
         hideDialog();
         finish();

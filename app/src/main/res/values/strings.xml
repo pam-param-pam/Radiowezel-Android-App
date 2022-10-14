@@ -12,4 +12,23 @@
     <string name="change_password">Change Password</string>
     <string name="old_password">Old Password</string>
     <string name="new_password">New Password</string>
+    <string name="play_pause_btn">Play</string>
+    <string name="on_text">Stop</string>
+    <string name="off_text">Play</string>
+    <string name="next_btn">Next</string>
+
+    <string-array name="music_titles">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="music_desc">
+        <item>a</item>
+        <item>b</item>
+        <item>c</item>
+        <item>d</item>
+    </string-array>
+
 </resources>
