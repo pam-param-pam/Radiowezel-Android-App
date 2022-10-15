@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,7 +35,6 @@ import dev.pamparampam.myapplication.R;
 
 import dev.pamparampam.myapplication.login.helper.Functions;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -45,11 +45,12 @@ import java.util.Objects;
  * www.snowcorp.org
  */
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements StartDragListener{
     private static final String TAG = HomeActivity.class.getSimpleName();
 
     private MaterialButton btnChangePass, btnLogout;
-
+    private RecyclerViewAdapter mAdapter;
+    private ItemTouchHelper touchHelper;
     private HashMap<String,String> user = new HashMap<>();
     private RecyclerView recyclerView;
     @SuppressLint("MissingInflatedId")
@@ -65,42 +66,22 @@ public class HomeActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recycler_view);
 
-        ArrayList<String> arrayList=new ArrayList<>();
-        arrayList.add("Don't care");
-        arrayList.add("Didn't ask");
-        arrayList.add("Ratio");
-        arrayList.add("Counter ratio");
-        arrayList.add("Skill issue");
-        arrayList.add("Cry about it");
-        arrayList.add("Pinged owner");
-        arrayList.add("Seethe");
-        arrayList.add("Mald");
-        arrayList.add("Fatherless");
-        arrayList.add("Stfu");
-        arrayList.add("No life");
-        arrayList.add("Touch grass");
-        arrayList.add("Cancelled");
-        arrayList.add("Denied");
-        arrayList.add("Exposed");
-        arrayList.add("Rat");
-        arrayList.add("Back pilled");
-        arrayList.add("Stay bad");
-        arrayList.add("Blocked");
-        arrayList.add("Stay mad");
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_list_item_1,
-                arrayList );
+        String[] s1 = getResources().getStringArray(R.array.music_titles);
+        String[] s2 = getResources().getStringArray(R.array.music_desc);
+        int[] images = {R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
 
 
-        String s1[] = getResources().getStringArray(R.array.music_titles);
-        String s2[] = getResources().getStringArray(R.array.music_desc);
-        int images[] = {R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
-        MyAdapter myAdapter = new MyAdapter(this, s1, s2, images);
-        recyclerView.setAdapter(myAdapter);
+
+        mAdapter = new RecyclerViewAdapter(this,this, s1, s2, images);
+
+        ItemTouchHelper.Callback callback =
+                new ItemMoveCallback(mAdapter);
+        touchHelper  = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(recyclerView);
+
+        recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
 
 
 
@@ -111,7 +92,9 @@ public class HomeActivity extends AppCompatActivity {
         init();
     }
 
+
     private void init() {
+
         btnLogout.setOnClickListener(v -> logoutUser());
 
         btnChangePass.setOnClickListener(v -> {
@@ -255,4 +238,8 @@ public class HomeActivity extends AppCompatActivity {
         Functions.hideProgressDialog(HomeActivity.this);
     }
 
+    @Override
+    public void requestDrag(RecyclerView.ViewHolder viewHolder) {
+        touchHelper.startDrag(viewHolder);
+    }
 }
