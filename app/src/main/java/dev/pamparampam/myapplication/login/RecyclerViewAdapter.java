@@ -1,16 +1,21 @@
 package dev.pamparampam.myapplication.login;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import dev.pamparampam.myapplication.R;
@@ -44,6 +49,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return new MyViewHolder(view);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
 
@@ -58,12 +64,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 return true;
             }
         });
+
     }
 
 
     @Override
     public int getItemCount() {
-        return data1.length;
+        if (data1 == null) return 0;
+        else return data1.length;
     }
 
 
@@ -93,11 +101,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         myViewHolder.cardView.setCardBackgroundColor(Color.WHITE);
     }
 
+    @Override
+    public void onRowSwiped(MyViewHolder myViewHolder) {
+
+    }
+
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView musicTitle, musicDesc;
-        ImageView musicThumbnail, handImage;
+        ImageView musicThumbnail, handImage, deleteImage;
         View rowView;
         CardView cardView;
         public MyViewHolder(@NonNull View itemView) {
@@ -108,6 +121,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             musicDesc = itemView.findViewById(R.id.music_desc);
             musicThumbnail = itemView.findViewById(R.id.music_thumbnail);
             handImage = itemView.findViewById(R.id.imageView);
+            deleteImage = itemView.findViewById(R.id.delete_image);
 
 
 
