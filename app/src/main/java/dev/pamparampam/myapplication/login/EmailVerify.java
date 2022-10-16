@@ -29,11 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by Akshay Raj on 06-02-2017.
- * akshay@snowcorp.org
- * www.snowcorp.org
- */
+
 public class EmailVerify extends AppCompatActivity {
     private static final String TAG = EmailVerify.class.getSimpleName();
 

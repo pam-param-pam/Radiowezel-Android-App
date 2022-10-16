@@ -8,29 +8,22 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import dev.pamparampam.myapplication.login.helper.Functions;
 
+import dev.pamparampam.myapplication.login.helper.Functions;
 import dev.pamparampam.myapplication.R;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * Created by Akshay Raj on 6/16/2016.
- * akshay@snowcorp.org
- * www.snowcorp.org
- */
 
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = RegisterActivity.class.getSimpleName();

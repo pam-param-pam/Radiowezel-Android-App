@@ -4,13 +4,13 @@ import android.content.Context;
 import android.graphics.Color;
 
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import dev.pamparampam.myapplication.R;
@@ -25,7 +25,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     String[] data1, data2;
 
     int[] img;
-    ImageView handImage;
     Context context;
 
 
@@ -52,14 +51,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.musicDesc.setText(data2[position]);
         holder.musicThumbnail.setImageResource(img[position]);
 
-        holder.handImage.setOnTouchListener(new View.OnTouchListener() {
+        holder.handImage.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() ==
-                        MotionEvent.ACTION_DOWN) {
-                    mStartDragListener.requestDrag(holder);
-                }
-                return false;
+            public boolean onLongClick(View v) {
+                mStartDragListener.requestDrag(holder);
+                return true;
             }
         });
     }
@@ -87,18 +83,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 
 
-
-
-
     @Override
     public void onRowSelected(MyViewHolder myViewHolder) {
-        myViewHolder.rowView.setBackgroundColor(Color.WHITE);
+        myViewHolder.cardView.setCardBackgroundColor(Color.LTGRAY);
     }
 
     @Override
     public void onRowClear(MyViewHolder myViewHolder) {
-        myViewHolder.rowView.setBackgroundColor(Color.GRAY);
-
+        myViewHolder.cardView.setCardBackgroundColor(Color.WHITE);
     }
 
 
@@ -107,9 +99,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         TextView musicTitle, musicDesc;
         ImageView musicThumbnail, handImage;
         View rowView;
+        CardView cardView;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             rowView = itemView;
+            cardView = itemView.findViewById(R.id.card_view);
             musicTitle = itemView.findViewById(R.id.music_titles);
             musicDesc = itemView.findViewById(R.id.music_desc);
             musicThumbnail = itemView.findViewById(R.id.music_thumbnail);

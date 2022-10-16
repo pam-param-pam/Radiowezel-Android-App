@@ -1,43 +1,26 @@
 package dev.pamparampam.myapplication.login;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import dev.pamparampam.myapplication.R;
-
-
 import dev.pamparampam.myapplication.login.helper.Functions;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
-/**
- * Created by Akshay Raj on 6/16/2016.
- * akshay@snowcorp.org
- * www.snowcorp.org
- */
+
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
@@ -169,11 +152,12 @@ public class LoginActivity extends AppCompatActivity {
 
 
         showDialog("Logging in ...");
-
+        new Login().hashPassword(password);
         sp.edit().putBoolean("logged",true).apply();
 
         Intent switchActivityIntent = new Intent(this, HomeActivity.class);
         hideDialog();
+        switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         finish();
         startActivity(switchActivityIntent);
 

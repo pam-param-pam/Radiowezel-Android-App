@@ -14,11 +14,6 @@ import com.google.android.material.textview.MaterialTextView;
 
 import dev.pamparampam.myapplication.R;
 
-/**
- * Created by Akshay Raj on 25/04/20 at 9:51 PM.
- * akshay@snowcorp.org
- * www.snowcorp.org
- */
 
 public class ProgressBarDialog extends DialogFragment {
     private Bundle bundle;
