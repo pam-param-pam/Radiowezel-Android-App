@@ -1,33 +1,22 @@
 package dev.pamparampam.myapplication.login;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import dev.pamparampam.myapplication.R;
-
-import dev.pamparampam.myapplication.login.helper.Functions;
-
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.login.helper.Functions;
 
 
 public class EmailVerify extends AppCompatActivity {
@@ -36,7 +25,6 @@ public class EmailVerify extends AppCompatActivity {
     private TextInputLayout textVerifyCode;
     private MaterialButton btnVerify, btnResend;
     private TextView otpCountDown;
-
 
 
     private static final String FORMAT = "%02d:%02d";
@@ -59,7 +47,6 @@ public class EmailVerify extends AppCompatActivity {
         otpCountDown = findViewById(R.id.otpCountDown);
 
         bundle = getIntent().getExtras();
-
 
 
         // Hide Keyboard
@@ -99,10 +86,7 @@ public class EmailVerify extends AppCompatActivity {
             @SuppressLint({"SetTextI18n", "DefaultLocale"})
             public void onTick(long millisUntilFinished) {
                 otpCountDown.setVisibility(View.VISIBLE);
-                otpCountDown.setText(""+String.format(FORMAT,
-                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished),
-                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
-                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)) ));
+                otpCountDown.setText("" + String.format(FORMAT, TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished), TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
             }
 
             public void onFinish() {
@@ -134,7 +118,7 @@ public class EmailVerify extends AppCompatActivity {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         countDown();
     }

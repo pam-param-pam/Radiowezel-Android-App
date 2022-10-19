@@ -84,41 +84,40 @@ public class RegisterActivity extends AppCompatActivity {
 
         showDialog();
 
-        StringRequest strReq = new StringRequest(Request.Method.POST,
-                Functions.REGISTER_URL, response -> {
-                    Log.d(TAG, "Register Response: " + response);
-                    hideDialog();
+        StringRequest strReq = new StringRequest(Request.Method.POST, Functions.REGISTER_URL, response -> {
+            Log.d(TAG, "Register Response: " + response);
+            hideDialog();
 
-                    try {
-                        JSONObject jObj = new JSONObject(response);
-                        boolean error = jObj.getBoolean("error");
-                        if (!error) {
-                            Functions logout = new Functions();
-                            logout.logoutUser(getApplicationContext());
+            try {
+                JSONObject jObj = new JSONObject(response);
+                boolean error = jObj.getBoolean("error");
+                if (!error) {
+                    Functions logout = new Functions();
+                    logout.logoutUser(getApplicationContext());
 
-                            Bundle b = new Bundle();
-                            b.putString("email", email);
-                            Intent i = new Intent(RegisterActivity.this, EmailVerify.class);
-                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            i.putExtras(b);
-                            startActivity(i);
-                            finish();
+                    Bundle b = new Bundle();
+                    b.putString("email", email);
+                    Intent i = new Intent(RegisterActivity.this, EmailVerify.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    i.putExtras(b);
+                    startActivity(i);
+                    finish();
 
-                        } else {
-                            // Error occurred in registration. Get the error
-                            // message
-                            String errorMsg = jObj.getString("message");
-                            Toast.makeText(getApplicationContext(),errorMsg, Toast.LENGTH_LONG).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                } else {
+                    // Error occurred in registration. Get the error
+                    // message
+                    String errorMsg = jObj.getString("message");
+                    Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-                }, error -> {
-                    Log.e(TAG, "Registration Error: " + error.getMessage(), error);
-                    Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-                    hideDialog();
-                }) {
+        }, error -> {
+            Log.e(TAG, "Registration Error: " + error.getMessage(), error);
+            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+            hideDialog();
+        }) {
 
             @Override
             protected Map<String, String> getParams() {

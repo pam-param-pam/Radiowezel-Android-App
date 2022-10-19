@@ -1,51 +1,35 @@
 package dev.pamparampam.myapplication.login;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.Toast;
+import android.widget.RelativeLayout;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textfield.TextInputLayout;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.login.helper.Functions;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
-
-
-public class HomeActivity extends AppCompatActivity implements StartDragListener{
+public class HomeActivity extends AppCompatActivity implements StartDragListener {
     private static final String TAG = HomeActivity.class.getSimpleName();
 
     private FloatingActionButton settingsBtn;
     private RecyclerViewAdapter mAdapter;
     private ItemTouchHelper touchHelper;
-    private HashMap<String,String> user = new HashMap<>();
+    private HashMap<String, String> user = new HashMap<>();
     private RecyclerView recyclerView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,21 +38,24 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
         settingsBtn = findViewById(R.id.floating_settings_btn);
 
-
+        RelativeLayout layout = findViewById(R.id.RLM);
         recyclerView = findViewById(R.id.recycler_view);
 
 
-        String[] s1 = getResources().getStringArray(R.array.music_titles);
-        String[] s2 = getResources().getStringArray(R.array.music_desc);
-        int[] images = {R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
+        String[] titles = getResources().getStringArray(R.array.music_titles);
+        String[] descriptions = getResources().getStringArray(R.array.music_desc);
 
 
+        int[] image = new int[]{R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
+        List<Item> list = new ArrayList<>();
+        for (int i = 0; i < titles.length; i++) {
+            list.add(new Item(image[i], titles[i], descriptions[i]));
+        }
+        mAdapter = new RecyclerViewAdapter(this, this, layout, list);
 
-        mAdapter = new RecyclerViewAdapter(this,this, s1, s2, images);
+        ItemTouchHelper.Callback callback = new ItemMoveCallback(mAdapter);
 
-        ItemTouchHelper.Callback callback =
-                new ItemMoveCallback(mAdapter);
-        touchHelper  = new ItemTouchHelper(callback);
+        touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(recyclerView);
 
         recyclerView.setAdapter(mAdapter);
@@ -90,9 +77,11 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
             startActivity(i);
         });
     }
+
     @Override
     public void onBackPressed() {
     }
+
     private void showDialog() {
         Functions.showProgressDialog(HomeActivity.this, "Please wait...");
     }

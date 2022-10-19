@@ -9,7 +9,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 public class Login {
-    public void hashPassword (String password) {
+    public void hashPassword(String password) {
         try {
             SecureRandom random = new SecureRandom();
             byte[] salt = new byte[32];

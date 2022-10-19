@@ -21,7 +21,6 @@ import dev.pamparampam.myapplication.login.helper.Functions;
 import java.util.Objects;
 
 
-
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
 
@@ -38,15 +37,14 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sp = getSharedPreferences("login",MODE_PRIVATE);
+        sp = getSharedPreferences("login", MODE_PRIVATE);
 
-        if(sp.getBoolean("logged",false)){
+        if (sp.getBoolean("logged", false)) {
 
 
             Intent switchActivityIntent = new Intent(this, HomeActivity.class);
             startActivity(switchActivityIntent);
-        }
-        else {
+        } else {
 
             setContentView(R.layout.activity_login);
 
@@ -100,19 +98,15 @@ public class LoginActivity extends AppCompatActivity {
     private void forgotPasswordDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.reset_password, null);
 
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setTitle("Forgot Password")
-                .setCancelable(false)
-                .setPositiveButton("Reset", (dialog, which) -> {})
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                .create();
+        AlertDialog alertDialog = new AlertDialog.Builder(this).setView(dialogView).setTitle("Forgot Password").setCancelable(false).setPositiveButton("Reset", (dialog, which) -> {
+        }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create();
 
         TextInputLayout mEditEmail = dialogView.findViewById(R.id.edit_email);
 
         Objects.requireNonNull(mEditEmail.getEditText()).addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -153,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
 
         showDialog("Logging in ...");
         new Login().hashPassword(password);
-        sp.edit().putBoolean("logged",true).apply();
+        sp.edit().putBoolean("logged", true).apply();
 
         Intent switchActivityIntent = new Intent(this, HomeActivity.class);
         hideDialog();

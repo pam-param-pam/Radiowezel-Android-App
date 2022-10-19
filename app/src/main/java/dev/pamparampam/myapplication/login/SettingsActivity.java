@@ -1,13 +1,10 @@
 package dev.pamparampam.myapplication.login;
 
-import static dev.pamparampam.myapplication.login.MyApplication.TAG;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -17,17 +14,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import dev.pamparampam.myapplication.R;
@@ -37,7 +27,8 @@ import dev.pamparampam.myapplication.login.helper.Functions;
 public class SettingsActivity extends AppCompatActivity {
 
     private MaterialButton btnChangePass, btnLogout;
-    private HashMap<String,String> user = new HashMap<>();
+    private HashMap<String, String> user = new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +42,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         init();
     }
+
     private void init() {
 
         btnLogout.setOnClickListener(v -> logoutUser());
@@ -82,8 +74,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(Objects.requireNonNull(oldPassword.getEditText()).getText().length() > 0 &&
-                            Objects.requireNonNull(newPassword.getEditText()).getText().length() > 0);
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(Objects.requireNonNull(oldPassword.getEditText()).getText().length() > 0 && Objects.requireNonNull(newPassword.getEditText()).getText().length() > 0);
                 }
 
                 @Override
@@ -118,15 +109,14 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void logoutUser() {
-        SharedPreferences sp = getSharedPreferences("login",MODE_PRIVATE);
+        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
 
-        sp.edit().putBoolean("logged",false).apply();
+        sp.edit().putBoolean("logged", false).apply();
 
         Intent switchActivityIntent = new Intent(this, LoginActivity.class);
         switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         finish();
-
 
 
         startActivity(switchActivityIntent);
@@ -137,8 +127,8 @@ public class SettingsActivity extends AppCompatActivity {
         // Tag used to cancel the request
 
 
-
     }
+
     private void showDialog() {
         Functions.showProgressDialog(SettingsActivity.this, "Please wait...");
     }
