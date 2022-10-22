@@ -16,6 +16,9 @@
     <string name="on_text">Stop</string>
     <string name="off_text">Play</string>
     <string name="next_btn">Next</string>
+    <string name="failed">"error occurred"</string>
+    <string name="todo">TODO</string>
+    <string name="search">search</string>
 
     <string-array name="music_titles">
         <item>1</item>

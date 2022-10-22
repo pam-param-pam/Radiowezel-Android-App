@@ -1,10 +1,9 @@
-package dev.pamparampam.myapplication.login.widget;
+package dev.pamparampam.myapplication.radiowezel.widget;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

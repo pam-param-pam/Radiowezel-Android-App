@@ -1,4 +1,4 @@
-package dev.pamparampam.myapplication.login;
+package dev.pamparampam.myapplication.radiowezel;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import dev.pamparampam.myapplication.R;
-import dev.pamparampam.myapplication.login.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 
 
 public class SettingsActivity extends AppCompatActivity {

@@ -6,6 +6,11 @@ android {
     namespace 'dev.pamparampam.myapplication'
     compileSdk 33
 
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+
+    }
+
     defaultConfig {
         applicationId "dev.pamparampam.myapplication"
         minSdk 21
@@ -40,6 +45,24 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'com.android.volley:volley:1.2.1'
+
+
+    implementation 'com.google.apis:google-api-services-youtube:v3-rev222-1.25.0'
+    implementation 'com.google.http-client:google-http-client-jackson2:1.42.2'
+
+    implementation 'com.google.api-client:google-api-client:1.15'
+
+    implementation files('libs/YouTubeAndroidPlayerApi.jar')
+
+    implementation 'com.google.http-client:google-http-client-gson:1.42.1'
+
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+
+
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

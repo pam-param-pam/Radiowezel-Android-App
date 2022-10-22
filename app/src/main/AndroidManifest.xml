@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.snowcorp.login">
+    package="dev.pamparampam.myapplication.radiowezel">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
 
 
+
+    <queries>
+        <intent>
+            <action android:name="com.google.android.youtube.api.service.START" />
+
+        </intent>
+    </queries>
 
     <application
-        android:name="dev.pamparampam.myapplication.login.MyApplication"
+        android:name="dev.pamparampam.myapplication.radiowezel.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -23,7 +31,7 @@
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name="dev.pamparampam.myapplication.login.LoginActivity"
+            android:name="dev.pamparampam.myapplication.radiowezel.LoginActivity"
             android:label="@string/app_name"
             android:exported="true">
             <intent-filter>
@@ -34,37 +42,56 @@
         </activity>
 
         <activity
-            android:name="dev.pamparampam.myapplication.login.HomeActivity"
+            android:name="dev.pamparampam.myapplication.radiowezel.HomeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
-        </activity>
-        <activity
-            android:name="dev.pamparampam.myapplication.login.SettingsActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="dev.pamparampam.myapplication.login.HomeActivity" />
         </activity>
 
         <activity
-            android:name="dev.pamparampam.myapplication.login.RegisterActivity"
+            android:name="dev.pamparampam.myapplication.radiowezel.SearchActivity"
             android:label="@string/app_name"
-            android:parentActivityName="dev.pamparampam.myapplication.login.LoginActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="dev.pamparampam.myapplication.login.LoginActivity" />
+                android:value="dev.pamparampam.myapplication.radiowezel.HomeActivity" />
+        </activity>
+        <activity
+            android:name="dev.pamparampam.myapplication.radiowezel.PlayerActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="dev.pamparampam.myapplication.radiowezel.SearchActivity" />
+
         </activity>
 
         <activity
-            android:name="dev.pamparampam.myapplication.login.EmailVerify"
+            android:name="dev.pamparampam.myapplication.radiowezel.SettingsActivity"
             android:label="@string/app_name"
-            android:parentActivityName="dev.pamparampam.myapplication.login.LoginActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="dev.pamparampam.myapplication.login.LoginActivity" />
+                android:value="dev.pamparampam.myapplication.radiowezel.HomeActivity" />
+        </activity>
+
+        <activity
+            android:name="dev.pamparampam.myapplication.radiowezel.RegisterActivity"
+            android:label="@string/app_name"
+            android:parentActivityName="dev.pamparampam.myapplication.radiowezel.LoginActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="dev.pamparampam.myapplication.radiowezel.LoginActivity" />
+        </activity>
+
+        <activity
+            android:name="dev.pamparampam.myapplication.radiowezel.EmailVerify"
+            android:label="@string/app_name"
+            android:parentActivityName="dev.pamparampam.myapplication.radiowezel.LoginActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="dev.pamparampam.myapplication.radiowezel.LoginActivity" />
         </activity>
     </application>
 

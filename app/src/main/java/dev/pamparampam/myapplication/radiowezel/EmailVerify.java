@@ -1,4 +1,4 @@
-package dev.pamparampam.myapplication.login;
+package dev.pamparampam.myapplication.radiowezel;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import dev.pamparampam.myapplication.R;
-import dev.pamparampam.myapplication.login.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 
 
 public class EmailVerify extends AppCompatActivity {

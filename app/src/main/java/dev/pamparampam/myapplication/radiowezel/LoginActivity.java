@@ -1,4 +1,4 @@
-package dev.pamparampam.myapplication.login;
+package dev.pamparampam.myapplication.radiowezel;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,7 +16,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
 import dev.pamparampam.myapplication.R;
-import dev.pamparampam.myapplication.login.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 
 import java.util.Objects;
 

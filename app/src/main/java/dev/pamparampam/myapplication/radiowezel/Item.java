@@ -1,4 +1,4 @@
-package dev.pamparampam.myapplication.login;
+package dev.pamparampam.myapplication.radiowezel;
 
 public class Item {
     private int thumbnail;

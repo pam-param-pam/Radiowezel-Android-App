@@ -1,4 +1,4 @@
-package dev.pamparampam.myapplication.login;
+package dev.pamparampam.myapplication.radiowezel;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

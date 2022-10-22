@@ -1,4 +1,4 @@
-package dev.pamparampam.myapplication.login.helper;
+package dev.pamparampam.myapplication.radiowezel.helper;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,7 +10,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import dev.pamparampam.myapplication.login.widget.ProgressBarDialog;
+import dev.pamparampam.myapplication.radiowezel.widget.ProgressBarDialog;
 
 
 public class Functions {

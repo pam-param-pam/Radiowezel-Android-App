@@ -1,4 +1,4 @@
-package dev.pamparampam.myapplication.login;
+package dev.pamparampam.myapplication.radiowezel;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,7 +14,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import dev.pamparampam.myapplication.login.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 import dev.pamparampam.myapplication.R;
 
 import com.android.volley.Request;
