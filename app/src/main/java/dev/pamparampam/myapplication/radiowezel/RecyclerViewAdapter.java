@@ -32,6 +32,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     private List<Item> mList;
 
+
     private Context context;
 
 
@@ -110,7 +111,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public void removeItem(int position) {
         mList.remove(position);
-        System.out.println(mList);
         // this will update recyclerview means refresh it
         notifyItemRemoved(position);
     }
@@ -118,6 +118,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void restoreItem(Item item, int position) {
         mList.add(position, item);
         notifyItemInserted(position);
+    }
+
+    public List<Item> getmList() {
+        return mList;
+    }
+
+    public void setmList(List<Item> mList) {
+        this.mList = mList;
     }
 
     @Override
@@ -147,7 +155,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView musicTitle, musicDesc;
         ImageView musicThumbnail, handImage;

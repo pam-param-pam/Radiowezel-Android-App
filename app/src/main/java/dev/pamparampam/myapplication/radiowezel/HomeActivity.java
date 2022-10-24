@@ -77,13 +77,13 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                filter("");
+
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                filter("");
+
                 return true;
             }
         });
@@ -144,30 +144,32 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
     private void buildRecyclerView() {
 
 
-        RelativeLayout layout = findViewById(R.id.RLM);
-        System.out.println(list);
-        if(list == null){
 
+        // TODO: 24.10.2022
+        //proper generating of recycler view
+        if(list == null){
+            RelativeLayout layout = findViewById(R.id.RLM);
             String[] titles = getResources().getStringArray(R.array.music_titles);
             String[] descriptions = getResources().getStringArray(R.array.music_desc);
             int[] image = new int[]{R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
 
-            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             list = new ArrayList<>();
             for (int i = 0; i < titles.length; i++) {
                 list.add(new Item(image[i], titles[i], descriptions[i]));
             }
+            mAdapter = new RecyclerViewAdapter(this, this, layout, list);
+            ItemTouchHelper.Callback callback = new ItemMoveCallback(mAdapter);
+
+            touchHelper = new ItemTouchHelper(callback);
+            touchHelper.attachToRecyclerView(recyclerView);
+
+            recyclerView.setAdapter(mAdapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
         }
 
-        mAdapter = new RecyclerViewAdapter(this, this, layout, list);
 
-        ItemTouchHelper.Callback callback = new ItemMoveCallback(mAdapter);
 
-        touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(recyclerView);
 
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @SuppressLint("MissingPermission")
@@ -274,7 +276,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         ArrayList<Item> filteredList = new ArrayList<>();
 
         // running a for loop to prefiltered elements.
-        for (Item item : list) {
+        for (Item item : mAdapter.getmList()) {
             // checking if the entered string matched with any item of our recycler view.
             if (item.getTitle().toLowerCase(Locale.ROOT).contains(text.toLowerCase())) {
                 // if the item is matched we are

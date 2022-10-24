@@ -23,7 +23,7 @@ public class EmailVerify extends AppCompatActivity {
     private static final String TAG = EmailVerify.class.getSimpleName();
 
     private TextInputLayout textVerifyCode;
-    private MaterialButton btnVerify, btnResend;
+    private MaterialButton verifyBtn, resendBtn;
     private TextView otpCountDown;
 
 
@@ -42,8 +42,8 @@ public class EmailVerify extends AppCompatActivity {
         setContentView(R.layout.activity_email_verify);
 
         textVerifyCode = findViewById(R.id.verify_code);
-        btnVerify = findViewById(R.id.btnVerify);
-        btnResend = findViewById(R.id.btnResendCode);
+        verifyBtn = findViewById(R.id.btnVerify);
+        resendBtn = findViewById(R.id.btnResendCode);
         otpCountDown = findViewById(R.id.otpCountDown);
 
         bundle = getIntent().getExtras();
@@ -56,7 +56,7 @@ public class EmailVerify extends AppCompatActivity {
     }
 
     private void init() {
-        btnVerify.setOnClickListener(v -> {
+        verifyBtn.setOnClickListener(v -> {
             // Hide Keyboard
             Functions.hideSoftKeyboard(EmailVerify.this);
 
@@ -71,8 +71,8 @@ public class EmailVerify extends AppCompatActivity {
             }
         });
 
-        btnResend.setEnabled(false);
-        btnResend.setOnClickListener(v -> {
+        resendBtn.setEnabled(false);
+        resendBtn.setOnClickListener(v -> {
             String email = bundle.getString("email");
             resendCode(email);
         });
@@ -91,7 +91,7 @@ public class EmailVerify extends AppCompatActivity {
 
             public void onFinish() {
                 otpCountDown.setVisibility(View.GONE);
-                btnResend.setEnabled(true);
+                resendBtn.setEnabled(true);
             }
         }.start();
     }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">tests</string>
+    <string name="app_name">Radiowęzeł</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_name">Fullname</string>
@@ -16,13 +16,13 @@
     <string name="on_text">Stop</string>
     <string name="off_text">Play</string>
     <string name="next_btn">Next</string>
-    <string name="failed">"error occurred"</string>
+    <string name="failed">"Error Occurred"</string>
     <string name="todo">TODO</string>
-    <string name="search">search</string>
-    <string name="video_id">Video ID : N/A</string>
+    <string name="search_youtube">Search on YouTube</string>
+    <string name="video_id">Video ID N/A</string>
     <string name="video_description">Video Description N/A</string>
     <string name="video_title">Video Title N/A</string>
-    <string name="title">Title</string>
+    <string name="search_recyclerView">Search</string>
 
     <string-array name="music_titles">
         <item>1</item>

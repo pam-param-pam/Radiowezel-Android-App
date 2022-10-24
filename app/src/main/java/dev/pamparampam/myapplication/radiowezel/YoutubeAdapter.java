@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 import dev.pamparampam.myapplication.R;
@@ -130,31 +132,19 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
         holder.add_new_video_btn.setOnClickListener(v -> {
             // showing snack-bar for undo
-            Snackbar snackbar = Snackbar.make(layout, singleVideo.getTitle() + " Added!", Snackbar.LENGTH_LONG);
+             String title = StringUtils.abbreviate(singleVideo.getTitle(), 40) ;
+
+
+            Snackbar snackbar = Snackbar.make(layout, title + " Added!", Snackbar.LENGTH_LONG);
 
 
             snackbar.show();
         });
 
-        //Picasso library allows for hassle-free image loading
-        // in your application—often in one line of code!
-        //Features :
-        //-Handling ImageView recycling and download cancellation in an adapter
-        //-Complex image transformations with minimal memory use
-        //-Automatic memory and disk caching
-        
-        //placing the thumbnail with picasso library 
-        //by resizing it to the size of thumbnail
 
-        //with method gives access to the global default Picasso instance
-        //load method starts an image request using the specified path may be a remote URL, file resource, etc.
-        //resize method resizes the image to the specified size in pixels wrt width and height
-        //centerCrop crops an image inside of the bounds specified by resize(int, int) rather than distorting the aspect ratio
-        //into method asynchronously fulfills the request into the specified Target
         Picasso.get().load(singleVideo.getThumbnailURL()).resize(480,270).centerCrop().into(holder.thumbnail);
 
         //setting on click listener for each video_item to launch clicked video in new activity
-        //onClick method called when the view is clicked
         holder.video_view.setOnClickListener(view -> {
 
             //creating a intent for PlayerActivity class from this Activity
@@ -183,9 +173,10 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
     //here the dataset is mVideoList
     @Override
     public int getItemCount() {
+
         return mVideoList.size();
     }
-    public class MyViewHolder extends RecyclerView.ViewHolder{
+    public static class MyViewHolder extends RecyclerView.ViewHolder{
 
         public ImageView thumbnail;
         public TextView video_title, video_id, video_description;

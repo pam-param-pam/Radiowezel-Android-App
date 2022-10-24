@@ -22,7 +22,7 @@
      -->
     <TextView
         android:id="@+id/player_title"
-        android:text="@string/title"
+        android:text="@string/video_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="4"
