@@ -138,6 +138,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
     }
     @Override
     public void onBackPressed() {
+
     }
 
     private void buildRecyclerView() {
@@ -223,10 +224,14 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         settingsBtn.setOnClickListener(v -> {
             Intent i = new Intent(HomeActivity.this, SettingsActivity.class);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+
         });
         searchBtn.setOnClickListener(v -> {
             Intent i = new Intent(HomeActivity.this, SearchActivity.class);
             startActivity(i);
+            overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+
         });
 
         microphoneBtn.setOnClickListener(v -> {

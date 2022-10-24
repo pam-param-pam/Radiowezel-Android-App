@@ -44,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
 
             Intent switchActivityIntent = new Intent(this, HomeActivity.class);
             startActivity(switchActivityIntent);
+
         } else {
 
             setContentView(R.layout.activity_login);

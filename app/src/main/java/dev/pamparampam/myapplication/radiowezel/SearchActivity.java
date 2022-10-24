@@ -6,6 +6,7 @@ import static android.widget.Toast.LENGTH_LONG;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -147,7 +148,20 @@ public class SearchActivity extends AppCompatActivity {
         //starting the thread
         }.start();
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+    }
     private void makeToast(String text) {
         Toast.makeText(this, text, LENGTH_LONG).show();
 
