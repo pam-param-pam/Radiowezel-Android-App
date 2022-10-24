@@ -9,9 +9,11 @@ import android.os.Handler;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -153,9 +155,9 @@ public class SearchActivity extends AppCompatActivity {
 
     //method for creating adapter and setting it to recycler view
     private void fillYoutubeVideos(){
-
+        ConstraintLayout layout = findViewById(R.id.CLM);
         //object of YoutubeAdapter which will fill the RecyclerView
-        youtubeAdapter = new YoutubeAdapter(getApplicationContext(),searchResults);
+        youtubeAdapter = new YoutubeAdapter(layout, getApplicationContext(),searchResults);
 
         //setAdapter to RecyclerView
         mRecyclerView.setAdapter(youtubeAdapter);

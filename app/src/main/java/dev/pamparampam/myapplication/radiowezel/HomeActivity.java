@@ -12,12 +12,18 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -30,6 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
@@ -45,7 +52,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
     private HashMap<String, String> user = new HashMap<>();
     private RecyclerView recyclerView;
     private MediaRecorder mediaRecorder;
-
+    private List<Item> list;
 
     private AudioRecord audioRecord;
     private AudioTrack audioTrack;
@@ -56,6 +63,50 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
     private int intGain;
     private boolean isRecording = false;
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // below line is to get our inflater
+        MenuInflater inflater = getMenuInflater();
+
+        // inside inflater we are inflating our menu file.
+        inflater.inflate(R.menu.search_menu, menu);
+
+        // below line is to get our menu item.
+        MenuItem searchItem = menu.findItem(R.id.actionSearch);
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                filter("");
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                filter("");
+                return true;
+            }
+        });
+        // getting search view of our item.
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        // below line is to call set on query text listener method.
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                return false;
+            }
+
+        });
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,19 +122,42 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         searchBtn = findViewById(R.id.search_btn);
 
 
-        RelativeLayout layout = findViewById(R.id.RLM);
+
         recyclerView = findViewById(R.id.recycler_view);
 
+        System.out.println("BUILDING RECYCLER VIEW AGAIN FROM SCRATCH!");
+        buildRecyclerView();
 
-        String[] titles = getResources().getStringArray(R.array.music_titles);
-        String[] descriptions = getResources().getStringArray(R.array.music_desc);
+
+        // Hide Keyboard
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+        init();
 
 
-        int[] image = new int[]{R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
-        List<Item> list = new ArrayList<>();
-        for (int i = 0; i < titles.length; i++) {
-            list.add(new Item(image[i], titles[i], descriptions[i]));
+    }
+    @Override
+    public void onBackPressed() {
+    }
+
+    private void buildRecyclerView() {
+
+
+        RelativeLayout layout = findViewById(R.id.RLM);
+        System.out.println(list);
+        if(list == null){
+
+            String[] titles = getResources().getStringArray(R.array.music_titles);
+            String[] descriptions = getResources().getStringArray(R.array.music_desc);
+            int[] image = new int[]{R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
+
+            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            list = new ArrayList<>();
+            for (int i = 0; i < titles.length; i++) {
+                list.add(new Item(image[i], titles[i], descriptions[i]));
+            }
         }
+
         mAdapter = new RecyclerViewAdapter(this, this, layout, list);
 
         ItemTouchHelper.Callback callback = new ItemMoveCallback(mAdapter);
@@ -93,14 +167,6 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-
-        // Hide Keyboard
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
-        init();
-
-
     }
 
     @SuppressLint("MissingPermission")
@@ -175,12 +241,9 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         });
 
 
-
     }
 
-    @Override
-    public void onBackPressed() {
-    }
+
 
     private void showDialog(String dialog) {
         Functions.showProgressDialog(HomeActivity.this, dialog);
@@ -201,6 +264,31 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
         }
     }
+    private void filter(String text) {
+        // creating a new array list to filter our data.
+        ArrayList<Item> filteredList = new ArrayList<>();
+
+        // running a for loop to prefiltered elements.
+        for (Item item : list) {
+            // checking if the entered string matched with any item of our recycler view.
+            if (item.getTitle().toLowerCase(Locale.ROOT).contains(text.toLowerCase())) {
+                // if the item is matched we are
+                // adding it to our filtered list.
+                filteredList.add(item);
+            }
+        }
+        if (filteredList.isEmpty()) {
+            // if no item is added in filtered list we are
+            // displaying a toast message as no data found.
+            Toast.makeText(this, "No Data Found..", Toast.LENGTH_SHORT).show();
+        } else {
+            // at last we are passing that filtered
+            // list to our adapter class.
+            mAdapter.filterList(filteredList);
+
+        }
+    }
+
     private String getRecordingFilePath() {
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);

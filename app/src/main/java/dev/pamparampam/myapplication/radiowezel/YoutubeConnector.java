@@ -58,16 +58,12 @@ public class YoutubeConnector {
 		// argument is required, but since we don't need anything
 		// initialized when the HttpRequest is initialized, we override
 		// the interface and provide a no-op function.
-		youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), new HttpRequestInitializer() {
+		//initialize method helps to add any extra details that may be required to process the query
+		youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {
 
-			//initialize method helps to add any extra details that may be required to process the query
-			@Override
-			public void initialize(HttpRequest request) throws IOException {
-
-				//setting package name and sha1 certificate to identify request by server
-				request.getHeaders().set("X-Android-Package", PACKAGENAME);
-				request.getHeaders().set("X-Android-Cert",SHA1);
-			}
+			//setting package name and sha1 certificate to identify request by server
+			request.getHeaders().set("X-Android-Package", PACKAGENAME);
+			request.getHeaders().set("X-Android-Cert", SHA1);
 		}).setApplicationName("SearchYoutube").build();
 
 		try {
@@ -122,7 +118,7 @@ public class YoutubeConnector {
 			List<SearchResult> results = response.getItems();
 
 			//list of type VideoItem for saving all data individually
-			List<VideoItem> items = new ArrayList<VideoItem>();
+			List<VideoItem> items = new ArrayList<>();
 
 			//check if result is found and call our setItemsList method
 			if (results != null) {
@@ -142,7 +138,7 @@ public class YoutubeConnector {
 	}
 
 	//method for filling our array list
-	private static List<VideoItem> setItemsList(Iterator<com.google.api.services.youtube.model.SearchResult> iteratorSearchResults) {
+	private static List<VideoItem> setItemsList(Iterator<SearchResult> iteratorSearchResults) {
 
 		//temporary list to store the raw data from the returned results
 		List<VideoItem> tempSetItems = new ArrayList<>();
@@ -156,7 +152,7 @@ public class YoutubeConnector {
 			//next() method returns single instance of current video item
 			//and returns next item everytime it is called
 			//SearchResult is Youtube's custom result type which can be used to retrieve data of each video item
-			com.google.api.services.youtube.model.SearchResult singleVideo = iteratorSearchResults.next();
+			SearchResult singleVideo = iteratorSearchResults.next();
 
 			//getId() method returns the resource ID of one video in the result obtained
 			ResourceId rId = singleVideo.getId();
@@ -170,10 +166,10 @@ public class YoutubeConnector {
 				VideoItem item = new VideoItem();
 
 				//getting High quality thumbnail object
-				//URL of thumbnail is in the heirarchy snippet/thumbnails/high/url
+				//URL of thumbnail is in the hierarchy snippet/thumbnails/high/url
 				Thumbnail thumbnail = singleVideo.getSnippet().getThumbnails().getHigh();
 
-				//retrieving title,description,thumbnail url, id from the heirarchy of each resource
+				//retrieving title,description,thumbnail url, id from the hierarchy of each resource
 				//Video ID - id/videoId
 				//Title - snippet/title
 				//Description - snippet/description
@@ -186,12 +182,6 @@ public class YoutubeConnector {
 				//adding one Video item to temporary array list
 				tempSetItems.add(item);
 
-				//for debug purpose printing one by one details of each Video that was found
-				System.out.println(" Video Id" + rId.getVideoId());
-				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
-				System.out.println(" Thumbnail: " + thumbnail.getUrl());
-				System.out.println(" Description: "+ singleVideo.getSnippet().getDescription());
-				System.out.println("\n-------------------------------------------------------------\n");
 			}
 		}
 		return tempSetItems;

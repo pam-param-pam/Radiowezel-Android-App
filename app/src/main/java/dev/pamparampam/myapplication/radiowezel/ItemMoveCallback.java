@@ -12,7 +12,7 @@ public class ItemMoveCallback extends ItemTouchHelper.Callback {
     private final ItemTouchHelperContract mAdapter;
 
     public ItemMoveCallback(ItemTouchHelperContract adapter) {
-        mAdapter = adapter;
+        this.mAdapter = adapter;
 
     }
 

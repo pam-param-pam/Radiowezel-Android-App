@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,6 +47,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.my_row, parent, false);
+
+
         return new MyViewHolder(view);
     }
 
@@ -56,16 +59,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.musicDesc.setText(mList.get(position).getDescription());
         holder.musicThumbnail.setImageResource(mList.get(position).getThumbnail());
 
-        holder.handImage.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                mStartDragListener.requestDrag(holder);
-                return true;
-            }
+        holder.handImage.setOnLongClickListener(v -> {
+            mStartDragListener.requestDrag(holder);
+            return true;
         });
 
     }
-
+    public void filterList(ArrayList<Item> filterList) {
+        // below line is to add our filtered
+        // list in our course array list.
+        mList = filterList;
+        // below line is to notify our adapter
+        // as change in recycler view data.
+        notifyDataSetChanged();
+    }
     @Override
     public int getItemCount() {
         if (mList == null) return 0;
@@ -84,12 +91,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         removeItem(position);
         // showing snack-bar for undo
         Snackbar snackbar = Snackbar.make(layout, name + " Removed!", Snackbar.LENGTH_LONG);
-        snackbar.setAction("UNDO", new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                restoreItem(deletedItem, position);
-            }
-        });
+        snackbar.setAction("UNDO", v -> restoreItem(deletedItem, position));
         snackbar.setActionTextColor(Color.GREEN);
         snackbar.show();
 
@@ -97,7 +99,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onRowDraw(Canvas c, RecyclerView recyclerView, MyViewHolder myViewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-        myViewHolder.rowView.setBackgroundResource(R.drawable.ic_launcher_background);
+
     }
 
     @Override
@@ -108,6 +110,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public void removeItem(int position) {
         mList.remove(position);
+        System.out.println(mList);
         // this will update recyclerview means refresh it
         notifyItemRemoved(position);
     }
