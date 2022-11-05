@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -28,7 +29,9 @@ import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 public class SettingsActivity extends AppCompatActivity {
 
     private MaterialButton btnChangePass, btnLogout;
+    private TextView email, username, firstName, lastName;
     private HashMap<String, String> user = new HashMap<>();
+    private SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         btnChangePass = findViewById(R.id.change_password);
         btnLogout = findViewById(R.id.logout);
+        email = findViewById(R.id.settings_email);
+        username = findViewById(R.id.settings_username);
+        firstName = findViewById(R.id.settings_first_name);
+        lastName = findViewById(R.id.settings_last_name);
+
+
 
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -58,6 +67,21 @@ public class SettingsActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
     }
     private void init() {
+        sp = getSharedPreferences("login", MODE_PRIVATE);
+        String usernameSp = sp.getString("username", "Username N/A");
+        username.setText(usernameSp);
+        String emailSp = sp.getString("email", "Email N/A");
+        email.setText(emailSp);
+        String firstNameSp = sp.getString("first_name", "First Name N/A");
+        firstName.setText(firstNameSp);
+        String lastNameSp = sp.getString("last_name", "Last Name N/A");
+        lastName.setText(lastNameSp);
+
+
+        email.setOnClickListener(v -> {
+            System.out.println("EMAIL CLICKED");
+
+        });
 
         btnLogout.setOnClickListener(v -> logoutUser());
 
@@ -123,7 +147,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void logoutUser() {
-        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+        sp = getSharedPreferences("login", MODE_PRIVATE);
 
         sp.edit().putBoolean("logged", false).apply();
 

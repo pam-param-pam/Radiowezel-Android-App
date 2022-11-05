@@ -1,6 +1,7 @@
 package dev.pamparampam.myapplication.radiowezel;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -35,7 +36,7 @@ public class EmailVerify extends AppCompatActivity {
     private static String KEY_NAME = "name";
     private static String KEY_EMAIL = "email";
     private static String KEY_CREATED_AT = "created_at";
-
+    private SharedPreferences sp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,16 +57,18 @@ public class EmailVerify extends AppCompatActivity {
     }
 
     private void init() {
+        sp = getSharedPreferences("login", MODE_PRIVATE);
         verifyBtn.setOnClickListener(v -> {
             // Hide Keyboard
             Functions.hideSoftKeyboard(EmailVerify.this);
 
-            String email = bundle.getString("email");
-            String otp = Objects.requireNonNull(textVerifyCode.getEditText()).getText().toString();
+            String code = Objects.requireNonNull(textVerifyCode.getEditText()).getText().toString();
 
-            if (!otp.isEmpty()) {
-                verifyCode(email, otp);
-                textVerifyCode.setErrorEnabled(false);
+            if (!code.isEmpty()) {
+                if(Functions.isValidVerifyCode(sp, this, code)) {
+                    textVerifyCode.setErrorEnabled(false);
+                }
+
             } else {
                 textVerifyCode.setError("Please enter verification code");
             }
@@ -73,8 +76,8 @@ public class EmailVerify extends AppCompatActivity {
 
         resendBtn.setEnabled(false);
         resendBtn.setOnClickListener(v -> {
-            String email = bundle.getString("email");
-            resendCode(email);
+
+            Functions.resendEmailVerifyCode(sp, this);
         });
 
         countDown();
@@ -96,18 +99,7 @@ public class EmailVerify extends AppCompatActivity {
         }.start();
     }
 
-    private void verifyCode(final String email, final String otp) {
 
-    }
-
-    private void resendCode(final String email) {
-        // Tag used to cancel the request
-
-
-        showDialog("Resending code ...");
-
-
-    }
 
     private void showDialog(String title) {
         Functions.showProgressDialog(EmailVerify.this, title);

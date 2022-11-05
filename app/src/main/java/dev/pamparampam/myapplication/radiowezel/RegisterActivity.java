@@ -1,6 +1,7 @@
 package dev.pamparampam.myapplication.radiowezel;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONException;
@@ -29,16 +31,25 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = RegisterActivity.class.getSimpleName();
 
     private MaterialButton btnRegister, btnLinkToLogin;
-    private TextInputLayout inputName, inputEmail, inputPassword;
+    private TextInputLayout inputUsername;
+    private TextInputLayout inputFirstName;
+    private TextInputLayout inputLastName;
+    private TextInputLayout inputEmail;
+    private TextInputLayout inputPassword;
+    private TextInputLayout inputRepeatPassword;
+    private SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
-        inputName = findViewById(R.id.edit_name);
+        inputUsername = findViewById(R.id.edit_username);
+        inputFirstName = findViewById(R.id.edit_first_name);
+        inputLastName = findViewById(R.id.edit_last_name);
         inputEmail = findViewById(R.id.edit_email);
         inputPassword = findViewById(R.id.edit_password);
+        inputRepeatPassword = findViewById(R.id.edit_repeat_password);
+
         btnRegister = findViewById(R.id.button_register);
         btnLinkToLogin = findViewById(R.id.button_login);
 
@@ -54,20 +65,31 @@ public class RegisterActivity extends AppCompatActivity {
             // Hide Keyboard
             Functions.hideSoftKeyboard(RegisterActivity.this);
 
-            String name = Objects.requireNonNull(inputName.getEditText()).getText().toString().trim();
+            String username = Objects.requireNonNull(inputUsername.getEditText()).getText().toString().trim();
+            String firstName = Objects.requireNonNull(inputFirstName.getEditText()).getText().toString().trim();
+            String lastName = Objects.requireNonNull(inputLastName.getEditText()).getText().toString().trim();
             String email = Objects.requireNonNull(inputEmail.getEditText()).getText().toString().trim();
             String password = Objects.requireNonNull(inputPassword.getEditText()).getText().toString().trim();
+            String repeatPassword = Objects.requireNonNull(inputRepeatPassword.getEditText()).getText().toString().trim();
 
             // Check for empty data in the form
-            if (!name.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
+            registerUser("pam1", "malachowski", "jedrek", "reallpamparampam.pl@gmail.com", "Jedrek06", "jedrek06");
+            /*
+            if (!username.isEmpty() && !firstName.isEmpty() && !lastName.isEmpty() && !repeatPassword.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
                 if (Functions.isValidEmailAddress(email)) {
-                    registerUser(name, email, password);
+                    if (password.equals(repeatPassword)) {
+                        registerUser(username, firstName, lastName, email, password, repeatPassword);
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), "Passwords are not the same!", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(getApplicationContext(), "Email is not valid!", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(getApplicationContext(), "Please enter your details!", Toast.LENGTH_LONG).show();
             }
+            */
         });
 
         // Link to Register Screen
@@ -78,62 +100,10 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void registerUser(final String name, final String email, final String password) {
-        // Tag used to cancel the request
-        String tag_string_req = "req_register";
+    private void registerUser(final String username, final String firstName, final String lastName, final String email, final String password, final String repeatPassword) {
+        sp = getSharedPreferences("login", MODE_PRIVATE);
+        Functions.register(sp, this, username, firstName, lastName, email, password, repeatPassword, inputUsername, inputFirstName, inputLastName, inputEmail, inputPassword, inputRepeatPassword);
 
-        showDialog();
-
-        StringRequest strReq = new StringRequest(Request.Method.POST, Functions.REGISTER_URL, response -> {
-            Log.d(TAG, "Register Response: " + response);
-            hideDialog();
-
-            try {
-                JSONObject jObj = new JSONObject(response);
-                boolean error = jObj.getBoolean("error");
-                if (!error) {
-                    Functions logout = new Functions();
-                    logout.logoutUser(getApplicationContext());
-
-                    Bundle b = new Bundle();
-                    b.putString("email", email);
-                    Intent i = new Intent(RegisterActivity.this, EmailVerify.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    i.putExtras(b);
-                    startActivity(i);
-                    finish();
-
-                } else {
-                    // Error occurred in registration. Get the error
-                    // message
-                    String errorMsg = jObj.getString("message");
-                    Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }, error -> {
-            Log.e(TAG, "Registration Error: " + error.getMessage(), error);
-            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-            hideDialog();
-        }) {
-
-            @Override
-            protected Map<String, String> getParams() {
-                // Posting params to register url
-                Map<String, String> params = new HashMap<>();
-                params.put("name", name);
-                params.put("email", email);
-                params.put("password", password);
-
-                return params;
-            }
-
-        };
-
-        // Adding request to request queue
-        MyApplication.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
     private void showDialog() {

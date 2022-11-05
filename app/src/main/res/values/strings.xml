@@ -23,6 +23,16 @@
     <string name="video_description">Video Description N/A</string>
     <string name="video_title">Video Title N/A</string>
     <string name="search_recyclerView">Search</string>
+    <string name="hint_repeat_password">Repeat password</string>
+    <string name="hint_first_name">First name</string>
+    <string name="hint_last_name">Last name</string>
+    <string name="hint_code">Code</string>
+    <string name="hint_code_not_arrived">Code didn\'t arrive?</string>
+    <string name="hint_username">Username</string>
+    <string name="settings_email">Email N/A</string>
+    <string name="settings_username">Username N/A</string>
+    <string name="settings_first_name">First Name N/A</string>
+    <string name="settings_last_name">Last Name N/A</string>
 
     <string-array name="music_titles">
         <item>1</item>
