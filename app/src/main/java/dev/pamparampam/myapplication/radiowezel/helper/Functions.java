@@ -14,28 +14,29 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.ClientError;
 import com.android.volley.NetworkError;
-import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.google.android.material.textfield.TextInputEditText;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import dev.pamparampam.myapplication.radiowezel.EmailVerify;
 import dev.pamparampam.myapplication.radiowezel.HomeActivity;
+import dev.pamparampam.myapplication.radiowezel.LoginActivity;
 import dev.pamparampam.myapplication.radiowezel.MyApplication;
 import dev.pamparampam.myapplication.radiowezel.VolleyCallback;
 import dev.pamparampam.myapplication.radiowezel.widget.ProgressBarDialog;
@@ -55,19 +56,23 @@ public class Functions {
     // OTP Verification
     private static final String OTP_VERIFY_URL = MAIN_URL + "auth/mail/verify/";
 
-    // Forgot Password
-    private static final String RESET_PASS_URL = MAIN_URL + "auth/mail/resend/";
+    private static final String RESEND_VERIFY_MAIL = MAIN_URL + "auth/mail/resend/";
 
-    public static boolean isValidVerifyCode(SharedPreferences sp, Context ct, String code) {
-        showProgressDialog(ct,"Verifying...");
+    private static final String RESET_URL = MAIN_URL + "auth/user/reset/";
+
+    // Forgot Password
+    private static final String RESET_PASSWORD_URL = MAIN_URL + "auth/user/reset/verify/";
+
+    public static void isValidVerifyCode(SharedPreferences sp, Context ct, String code) {
+        showProgressDialog(ct, "Verifying...");
         Map<String, String> params = new HashMap<>();
 
         params.put("code", code);
 
-        makeRequest(new VolleyCallback(){
+        makeRequest(new VolleyCallback() {
 
             @Override
-            public void onSuccess(JSONObject result){
+            public void onSuccess(JSONObject result) {
                 hideProgressDialog(ct);
                 Intent switchActivityIntent = new Intent(ct, HomeActivity.class);
 
@@ -79,9 +84,7 @@ public class Functions {
             }
 
             @Override
-            public void onError(int code, JSONObject message) {
-                hideProgressDialog(ct);
-
+            public void onError(int code, Map<String, ArrayList<String>> message) {
 
             }
 
@@ -89,18 +92,86 @@ public class Functions {
         }, ct, OTP_VERIFY_URL, params, true, sp);
 
 
-        return false;
     }
-    public static void resendResetCode(SharedPreferences sp, Context ct) {
+    public static void reset(SharedPreferences sp, Context ct, String email) {
+        showProgressDialog(ct, "Sending email...");
+        Map<String, String> params = new HashMap<>();
+
+        params.put("email", email);
+
+
+        makeRequest(new VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject result) {
+
+            }
+
+            @Override
+            public void onError(int code, Map<String, ArrayList<String>> message) {
+            if (message.containsKey("email")) {
+                Toast.makeText(ct, message.get("email").get(0), Toast.LENGTH_SHORT).show();
+            }
+            }
+
+
+        }, ct, RESET_URL, params, false, sp);
+
 
     }
+    public static void resetPassword(SharedPreferences sp, Context ct, String email, String code, String password) {
+        showProgressDialog(ct, "Reseting...");
+        Map<String, String> params = new HashMap<>();
+
+        params.put("email", email);
+        params.put("code", code);
+        params.put("password", password);
+
+        makeRequest(new VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject result) {
+
+            }
+
+            @Override
+            public void onError(int code, Map<String, ArrayList<String>> message) {
+
+            }
+
+
+        }, ct, RESET_PASSWORD_URL, params, false, sp);
+
+    }
+
     public static void resendEmailVerifyCode(SharedPreferences sp, Context ct) {
+        Map<String, String> params = new HashMap<>();
+
+        makeRequest(new VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject result) {
+                Toast.makeText(ct, "Resend!", Toast.LENGTH_SHORT).show();
+
+
+            }
+
+            @Override
+            public void onError(int code, Map<String, ArrayList<String>> message) {
+                Toast.makeText(ct, "Error!", Toast.LENGTH_SHORT).show();
+                hideProgressDialog(ct);
+
+
+            }
+
+
+        }, ct, RESEND_VERIFY_MAIL, params, true, sp);
     }
-    public static void resetPassword(SharedPreferences sp, Context ct) {
-        //TODO send code etc idk
-    }
-    public static void register(SharedPreferences sp, Context ct, String usernameText, String firstNameText, String lastNameText, String emailText, String passwordText, String repeatPasswordText, TextInputLayout username, TextInputLayout first_name, TextInputLayout last_name, TextInputLayout password, TextInputLayout email, TextInputLayout repeatPassword) {
-        showProgressDialog(ct,"Registering...");
+
+
+
+    public static void register(SharedPreferences sp, Context ct, String usernameText, String firstNameText, String lastNameText, String emailText, String passwordText, String repeatPasswordText, TextInputLayout username, TextInputLayout first_name, TextInputLayout last_name, TextInputLayout email, TextInputLayout password, TextInputLayout repeatPassword) {
+        showProgressDialog(ct, "Registering...");
         Map<String, String> params = new HashMap<>();
 
         params.put("username", usernameText);
@@ -109,10 +180,11 @@ public class Functions {
         params.put("email", emailText);
         params.put("password", passwordText);
         params.put("repeatPassword", repeatPasswordText);
-        makeRequest(new VolleyCallback(){
+        makeRequest(new VolleyCallback() {
 
             @Override
-            public void onSuccess(JSONObject result){
+            public void onSuccess(JSONObject result) {
+
                 String token = result.optString("access");
                 sp.edit().putString("token", token).apply();
 
@@ -148,33 +220,55 @@ public class Functions {
             }
 
             @Override
-            public void onError(int code, JSONObject message) {
+            public void onError(int code, Map<String, ArrayList<String>> message) {
+                username.setErrorEnabled(false);
+                first_name.setErrorEnabled(false);
+                last_name.setErrorEnabled(false);
+                email.setErrorEnabled(false);
+                password.setErrorEnabled(false);
+                repeatPassword.setErrorEnabled(false);
+
+                System.out.println("MESSSAAAAGE " + message);
+                if (message.containsKey("username")) {
+                    username.setError(String.join("\n", Objects.requireNonNull(message.get("username"))));
+                }
+                if (message.containsKey("email")) {
+                    email.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
+                }
+                if (message.containsKey("first_name")) {
+                    first_name.setError(String.join("\n", Objects.requireNonNull(message.get("first_name"))));
+                }
+                if (message.containsKey("last_name")) {
+                    last_name.setError(String.join("\n", Objects.requireNonNull(message.get("last_name"))));
+                }
+                if (message.containsKey("password")) {
+                    password.setError(String.join("\n", Objects.requireNonNull(message.get("password"))));
+                }
+                if (message.containsKey("repeatPassword")) {
+                    repeatPassword.setError(String.join("\n", Objects.requireNonNull(message.get("repeatPassword"))));
+                }
+
                 hideProgressDialog(ct);
-                Gson gson = new Gson();
-                StudentList list = gson.fromJson(response);
-                Toast.makeText(ct, message, Toast.LENGTH_SHORT).show();
+
 
             }
-
 
 
         }, ct, REGISTER_URL, params, false, sp);
 
     }
 
-    public static void resendCode() {
 
-    }
     public static void login(SharedPreferences sp, Context ct, String email, String password) {
-        showProgressDialog(ct,"Logging in ...");
-        Map<String, String> params  = new HashMap<>();
+        showProgressDialog(ct, "Logging in ...");
+        Map<String, String> params = new HashMap<>();
         params.put("username", email);
-        params.put("password", password);
+        params.put("new_password", password);
 
-        makeRequest(new VolleyCallback(){
+        makeRequest(new VolleyCallback() {
 
             @Override
-            public void onSuccess(JSONObject result){
+            public void onSuccess(JSONObject result) {
                 String token = result.optString("token");
 
                 sp.edit().putString("token", token).apply();
@@ -196,7 +290,6 @@ public class Functions {
                 String last_name = result.optString("last_name");
                 sp.edit().putString("last_name", last_name).apply();
 
-                hideProgressDialog(ct);
 
                 Intent switchActivityIntent = new Intent(ct, HomeActivity.class);
 
@@ -206,24 +299,21 @@ public class Functions {
                 ct.startActivity(switchActivityIntent);
 
 
-
             }
 
             @Override
-            public void onError(int code, JSONObject message) {
-                hideProgressDialog(ct);
+            public void onError(int code, Map<String, ArrayList<String>> message) {
             }
-
-
-
 
 
         }, ct, LOGIN_URL, params, false, sp);
     }
+
     public static void makeRequest(final VolleyCallback callback, Context ct, String URL, Map<String, String> params, boolean isTokenNeeded, SharedPreferences sp) {
-        StringRequest request = new StringRequest(Request.Method.POST,URL, new Response.Listener<String>() {
+        StringRequest request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                hideProgressDialog(ct);
                 try {
                     JSONObject obj = new JSONObject(response);
                     callback.onSuccess(obj);
@@ -236,38 +326,38 @@ public class Functions {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                int statusCode;
-                NetworkResponse response = null;
-                String message = null;
+                hideProgressDialog(ct);
+                int statusCode = 0;
+
                 System.out.println(error.getLocalizedMessage());
                 if (error.networkResponse != null) {
-                    statusCode = error.networkResponse.statusCode;
                     byte[] htmlBodyBytes = error.networkResponse.data;
+
+                    statusCode = error.networkResponse.statusCode;
+
+                    ObjectMapper om = new ObjectMapper();
+                    TypeReference<Map<String, ArrayList<String>>> tr = new TypeReference<Map<String, ArrayList<String>>>() {
+                    };
                     try {
-                        JSONObject obj = new JSONObject(new String(htmlBodyBytes));
-                        callback.onError(statusCode, obj);
-                    } catch (JSONException e) {
+                        Map<String, ArrayList<String>> val = om.readValue(htmlBodyBytes, tr);
+                        System.out.println(val);
+                        callback.onError(statusCode, val);
+
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-                }
-                else {
-                    statusCode = 0;
-
                 }
 
 
-
-                if( error instanceof NetworkError) {
+                if (error instanceof NetworkError) {
                     Toast.makeText(ct, "NETWORK ERROR", Toast.LENGTH_SHORT).show();
-                }
-                  else if( error instanceof AuthFailureError) {
+                } else if (error instanceof AuthFailureError) {
                     Toast.makeText(ct, "UNAUTHORIZED!", Toast.LENGTH_SHORT).show();
 
-                } else if( error instanceof ParseError) {
+                } else if (error instanceof ParseError) {
                     Toast.makeText(ct, "Parse Error " + statusCode, Toast.LENGTH_SHORT).show();
 
-                } else if( error instanceof TimeoutError) {
+                } else if (error instanceof TimeoutError) {
                     Toast.makeText(ct, "Server doesn't respond... " + statusCode, Toast.LENGTH_SHORT).show();
 
                 }
@@ -277,7 +367,7 @@ public class Functions {
             //This is for Headers If You Needed
             @Override
             public Map<String, String> getHeaders() {
-                Map<String, String> headers  = new HashMap<>();
+                Map<String, String> headers = new HashMap<>();
                 if (isTokenNeeded) {
                     String token = sp.getString("token", "token");
                     headers.put("Authorization", "Bearer " + token);
@@ -289,6 +379,7 @@ public class Functions {
             //Pass Your Parameters here
             @Override
             protected Map<String, String> getParams() {
+
                 return params;
             }
         };
@@ -300,16 +391,17 @@ public class Functions {
 
 
 
+
     /**
      * Function to logout user
      * Resets the temporary data stored in SQLite Database
-     * */
-    public void logoutUser(Context context){
+     */
+    public void logoutUser(Context context) {
 
     }
 
     /**
-     *  Email Address Validation
+     * Email Address Validation
      */
     public static boolean isValidEmailAddress(String email) {
         String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
@@ -319,29 +411,26 @@ public class Functions {
     }
 
     /**
-     *  Hide Keyboard
+     * Hide Keyboard
      */
     public static void hideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager =
-                (InputMethodManager) activity.getSystemService(
-                        Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = activity.getCurrentFocus();
 
         if (focusedView != null) {
-            inputMethodManager.hideSoftInputFromWindow(
-                    activity.getCurrentFocus().getWindowToken(), 0);
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         }
 
     }
 
     public static void showProgressDialog(Context context, String title) {
-        FragmentManager fm = ((AppCompatActivity)context).getSupportFragmentManager();
+        FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
         DialogFragment newFragment = ProgressBarDialog.newInstance(title);
         newFragment.show(fm, "dialog");
     }
 
     public static void hideProgressDialog(Context context) {
-        FragmentManager fm = ((AppCompatActivity)context).getSupportFragmentManager();
+        FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
         Fragment prev = fm.findFragmentByTag("dialog");
         if (prev != null) {
             DialogFragment df = (DialogFragment) prev;

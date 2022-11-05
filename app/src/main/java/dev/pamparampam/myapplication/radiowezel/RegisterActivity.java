@@ -73,8 +73,7 @@ public class RegisterActivity extends AppCompatActivity {
             String repeatPassword = Objects.requireNonNull(inputRepeatPassword.getEditText()).getText().toString().trim();
 
             // Check for empty data in the form
-            registerUser("pam1", "malachowski", "jedrek", "reallpamparampam.pl@gmail.com", "Jedrek06", "jedrek06");
-            /*
+
             if (!username.isEmpty() && !firstName.isEmpty() && !lastName.isEmpty() && !repeatPassword.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
                 if (Functions.isValidEmailAddress(email)) {
                     if (password.equals(repeatPassword)) {
@@ -89,7 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(getApplicationContext(), "Please enter your details!", Toast.LENGTH_LONG).show();
             }
-            */
+
         });
 
         // Link to Register Screen

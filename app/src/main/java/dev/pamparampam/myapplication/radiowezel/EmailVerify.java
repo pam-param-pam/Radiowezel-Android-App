@@ -32,10 +32,7 @@ public class EmailVerify extends AppCompatActivity {
 
     Bundle bundle;
 
-    private static String KEY_UID = "uid";
-    private static String KEY_NAME = "name";
-    private static String KEY_EMAIL = "email";
-    private static String KEY_CREATED_AT = "created_at";
+
     private SharedPreferences sp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +62,8 @@ public class EmailVerify extends AppCompatActivity {
             String code = Objects.requireNonNull(textVerifyCode.getEditText()).getText().toString();
 
             if (!code.isEmpty()) {
-                if(Functions.isValidVerifyCode(sp, this, code)) {
-                    textVerifyCode.setErrorEnabled(false);
-                }
+                Functions.isValidVerifyCode(sp, this, code);
+
 
             } else {
                 textVerifyCode.setError("Please enter verification code");
@@ -75,16 +71,13 @@ public class EmailVerify extends AppCompatActivity {
         });
 
         resendBtn.setEnabled(false);
-        resendBtn.setOnClickListener(v -> {
-
-            Functions.resendEmailVerifyCode(sp, this);
-        });
+        resendBtn.setOnClickListener(v -> Functions.resendEmailVerifyCode(sp, this));
 
         countDown();
     }
 
     private void countDown() {
-        new CountDownTimer(70000, 1000) { // adjust the milli seconds here
+        new CountDownTimer(5000, 1000) { // adjust the milli seconds here
 
             @SuppressLint({"SetTextI18n", "DefaultLocale"})
             public void onTick(long millisUntilFinished) {

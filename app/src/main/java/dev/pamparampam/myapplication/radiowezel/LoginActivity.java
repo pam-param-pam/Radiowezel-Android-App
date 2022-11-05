@@ -86,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void forgotPasswordDialog() {
+        sp = getSharedPreferences("login", MODE_PRIVATE);
         View dialogView = getLayoutInflater().inflate(R.layout.enter_email, null);
 
         AlertDialog alertDialog = new AlertDialog.Builder(this).setView(dialogView).setTitle("Forgot Password").setCancelable(false).setPositiveButton("Reset", (dialog, which) -> {
@@ -109,6 +110,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         alertDialog.setOnShowListener(dialog -> {
+
             final Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setEnabled(false);
 
@@ -117,6 +119,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (!email.isEmpty()) {
                     if (Functions.isValidEmailAddress(email)) {
+                        Functions.reset(sp, this, email);
                         enterEmailCodeDialog(email);
                         dialog.dismiss();
                     } else {
@@ -136,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
         Button codeNotArrived = dialogView.findViewById(R.id.code_not_arrived);
         sp = getSharedPreferences("login", MODE_PRIVATE);
         codeNotArrived.setOnClickListener(view -> {
-            Functions.resendResetCode(sp, this);
+            Functions.reset(sp, this, email);
             Toast.makeText(getApplicationContext(), "Resending...", Toast.LENGTH_LONG).show();
 
 
@@ -172,13 +175,10 @@ public class LoginActivity extends AppCompatActivity {
                 String code = mEmailCode.getEditText().getText().toString();
 
                 if (!code.isEmpty()) {
-                    if (Functions.isValidVerifyCode(sp, this, code)) {
-                        Functions.resetPassword(sp, this);
-                        dialog.dismiss();
-                        enterNewPasswordsDialog(email, code);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Code is not valid!", Toast.LENGTH_SHORT).show();
-                    }
+
+                    dialog.dismiss();
+                    enterNewPasswordsDialog(email, code);
+
                 } else {
                     Toast.makeText(getApplicationContext(), "Fill all values!", Toast.LENGTH_SHORT).show();
                 }
@@ -237,8 +237,9 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (!password.isEmpty() && !repeatPassword.isEmpty()) {
                     if (password.equals(repeatPassword)) {
-                        //TODO AUTO LOGING? IDK
+                        Functions.resetPassword(sp, this, email, code, password);
                         dialog.dismiss();
+                        //enterEmailCodeDialog(email);
 
                     }
                     else {
