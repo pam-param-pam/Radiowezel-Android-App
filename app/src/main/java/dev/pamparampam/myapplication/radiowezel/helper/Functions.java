@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -42,7 +43,7 @@ import dev.pamparampam.myapplication.radiowezel.VolleyCallback;
 import dev.pamparampam.myapplication.radiowezel.widget.ProgressBarDialog;
 
 
-public class Functions {
+public class Functions extends AppCompatActivity{
 
     //Main URL
     private static final String MAIN_URL = "http://178.42.189.210:8000/";
@@ -58,11 +59,12 @@ public class Functions {
 
     private static final String RESEND_VERIFY_MAIL = MAIN_URL + "auth/mail/resend/";
 
-    private static final String RESET_URL = MAIN_URL + "auth/user/reset/";
+    private static final String RESET_START_URL = MAIN_URL + "auth/user/reset/start/";
+
+    private static final String RESET_CHECK_URL = MAIN_URL + "auth/user/reset/check/";
 
     // Forgot Password
-    private static final String RESET_PASSWORD_URL = MAIN_URL + "auth/user/reset/verify/";
-
+    private static final String RESET_FINISH_URL = MAIN_URL + "auth/user/reset/finish/";
     public static void isValidVerifyCode(SharedPreferences sp, Context ct, String code) {
         showProgressDialog(ct, "Verifying...");
         Map<String, String> params = new HashMap<>();
@@ -91,56 +93,94 @@ public class Functions {
 
         }, ct, OTP_VERIFY_URL, params, true, sp);
 
-
     }
-    public static void reset(SharedPreferences sp, Context ct, String email) {
-        showProgressDialog(ct, "Sending email...");
-        Map<String, String> params = new HashMap<>();
 
-        params.put("email", email);
-
-
-        makeRequest(new VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject result) {
-
-            }
-
-            @Override
-            public void onError(int code, Map<String, ArrayList<String>> message) {
-            if (message.containsKey("email")) {
-                Toast.makeText(ct, message.get("email").get(0), Toast.LENGTH_SHORT).show();
-            }
-            }
-
-
-        }, ct, RESET_URL, params, false, sp);
-
-
-    }
-    public static void resetPassword(SharedPreferences sp, Context ct, String email, String code, String password) {
-        showProgressDialog(ct, "Reseting...");
+    public static void resetCheck(SharedPreferences sp, Context ct, String email, String code, AlertDialog alertDialog, TextInputLayout mEditEmail) {
+        showProgressDialog(ct, "Checking...");
         Map<String, String> params = new HashMap<>();
 
         params.put("email", email);
         params.put("code", code);
-        params.put("password", password);
 
         makeRequest(new VolleyCallback() {
 
             @Override
             public void onSuccess(JSONObject result) {
+                LoginActivity.getInstance().enterNewPasswordsDialog(email, code);
+                alertDialog.dismiss();
 
             }
 
             @Override
             public void onError(int code, Map<String, ArrayList<String>> message) {
+                if (message.containsKey("code")) {
+                    mEditEmail.setError(String.join("\n", Objects.requireNonNull(message.get("code"))));
+                }
+                if (message.containsKey("email")) {
+                    mEditEmail.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
+                }
+            }
+
+        }, ct, RESET_CHECK_URL, params, false, sp);
+
+    }
+
+    public static void resetStart(SharedPreferences sp, Context ct, String email, AlertDialog alertDialog, TextInputLayout mEditEmail) {
+        showProgressDialog(ct, "Sending email...");
+        Map<String, String> params = new HashMap<>();
+        params.put("email", email);
+        makeRequest(new VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject result) {
+                LoginActivity.getInstance().enterEmailCodeDialog(email);
+
+                alertDialog.dismiss();
 
             }
 
+            @Override
+            public void onError(int code, Map<String, ArrayList<String>> message) {
+                if (message.containsKey("email")) {
+                    mEditEmail.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
+                    }
+                }
 
-        }, ct, RESET_PASSWORD_URL, params, false, sp);
+        }, ct, RESET_START_URL, params, false, sp);
+
+    }
+    public static void resetFinish(SharedPreferences sp, Context ct, String email, String code, String passwordText, AlertDialog alertDialog, TextInputLayout password, TextInputLayout repeatPassword) {
+        showProgressDialog(ct, "Reseting...");
+        Map<String, String> params = new HashMap<>();
+        params.put("email", email);
+        params.put("code", code);
+        params.put("new_password", passwordText);
+        makeRequest(new VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject result) {
+
+                Toast.makeText(ct, "Password reset", Toast.LENGTH_SHORT).show();
+                alertDialog.dismiss();
+
+            }
+
+            @Override
+            public void onError(int code, Map<String, ArrayList<String>> message) {
+                if (message.containsKey("new_password")) {
+                    password.setError(String.join("\n", Objects.requireNonNull(message.get("new_password"))));
+                    repeatPassword.setError(String.join("\n", Objects.requireNonNull(message.get("new_password"))));
+
+                }
+                if (message.containsKey("non_field_errors")) {
+                    password.setError(String.join("\n", Objects.requireNonNull(message.get("non_field_errors"))));
+                    repeatPassword.setError(String.join("\n", Objects.requireNonNull(message.get("non_field_errors"))));
+
+                }
+
+            }
+
+        }, ct, RESET_FINISH_URL, params, false, sp);
 
     }
 
@@ -153,22 +193,17 @@ public class Functions {
             public void onSuccess(JSONObject result) {
                 Toast.makeText(ct, "Resend!", Toast.LENGTH_SHORT).show();
 
-
             }
 
             @Override
             public void onError(int code, Map<String, ArrayList<String>> message) {
                 Toast.makeText(ct, "Error!", Toast.LENGTH_SHORT).show();
                 hideProgressDialog(ct);
-
-
             }
 
 
         }, ct, RESEND_VERIFY_MAIL, params, true, sp);
     }
-
-
 
     public static void register(SharedPreferences sp, Context ct, String usernameText, String firstNameText, String lastNameText, String emailText, String passwordText, String repeatPasswordText, TextInputLayout username, TextInputLayout first_name, TextInputLayout last_name, TextInputLayout email, TextInputLayout password, TextInputLayout repeatPassword) {
         showProgressDialog(ct, "Registering...");
@@ -216,7 +251,6 @@ public class Functions {
                 ((Activity) ct).finish();
 
                 ct.startActivity(switchActivityIntent);
-
             }
 
             @Override
@@ -228,7 +262,6 @@ public class Functions {
                 password.setErrorEnabled(false);
                 repeatPassword.setErrorEnabled(false);
 
-                System.out.println("MESSSAAAAGE " + message);
                 if (message.containsKey("username")) {
                     username.setError(String.join("\n", Objects.requireNonNull(message.get("username"))));
                 }
@@ -250,7 +283,6 @@ public class Functions {
 
                 hideProgressDialog(ct);
 
-
             }
 
 
@@ -258,12 +290,11 @@ public class Functions {
 
     }
 
-
-    public static void login(SharedPreferences sp, Context ct, String email, String password) {
+    public static void login(SharedPreferences sp, Context ct, String email, String passwordText, TextInputLayout inputEmail, TextInputLayout inputPassword) {
         showProgressDialog(ct, "Logging in ...");
         Map<String, String> params = new HashMap<>();
         params.put("username", email);
-        params.put("new_password", password);
+        params.put("password", passwordText);
 
         makeRequest(new VolleyCallback() {
 
@@ -298,13 +329,17 @@ public class Functions {
 
                 ct.startActivity(switchActivityIntent);
 
-
             }
 
             @Override
             public void onError(int code, Map<String, ArrayList<String>> message) {
+                if (message.containsKey("username")) {
+                    inputEmail.setError(String.join("\n", Objects.requireNonNull(message.get("username"))));
+                }
+                if (message.containsKey("password")) {
+                    inputPassword.setError(String.join("\n", Objects.requireNonNull(message.get("password"))));
+                }
             }
-
 
         }, ct, LOGIN_URL, params, false, sp);
     }
@@ -319,7 +354,6 @@ public class Functions {
                     callback.onSuccess(obj);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    callback.onError(0, null);
                 }
             }
 
@@ -328,8 +362,7 @@ public class Functions {
             public void onErrorResponse(VolleyError error) {
                 hideProgressDialog(ct);
                 int statusCode = 0;
-
-                System.out.println(error.getLocalizedMessage());
+                Map<String, ArrayList<String>> val = null;
                 if (error.networkResponse != null) {
                     byte[] htmlBodyBytes = error.networkResponse.data;
 
@@ -339,7 +372,8 @@ public class Functions {
                     TypeReference<Map<String, ArrayList<String>>> tr = new TypeReference<Map<String, ArrayList<String>>>() {
                     };
                     try {
-                        Map<String, ArrayList<String>> val = om.readValue(htmlBodyBytes, tr);
+                        // TODO fix this cuz it gets broken when dict has len 1 i think
+                        val = om.readValue(htmlBodyBytes, tr);
                         System.out.println(val);
                         callback.onError(statusCode, val);
 
@@ -348,23 +382,29 @@ public class Functions {
                     }
                 }
 
+                if (statusCode == 500) {
+                    Toast.makeText(ct, "WHOOPSIE POOPSIE UWU WE MADE A FUCKY WUCKY THE CODE MONKEYS AT OUR HEADQUARTERS ARE WORKING VEVY HARD TO FIX THIS >-<", Toast.LENGTH_LONG).show();
 
+                }
+                if (statusCode == 429) {
+                    Toast.makeText(ct, "TO MANY REQUESTS", Toast.LENGTH_LONG).show();
+
+                }
                 if (error instanceof NetworkError) {
-                    Toast.makeText(ct, "NETWORK ERROR", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ct, "NETWORK ERROR", Toast.LENGTH_LONG).show();
                 } else if (error instanceof AuthFailureError) {
-                    Toast.makeText(ct, "UNAUTHORIZED!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ct, "UNAUTHORIZED!", Toast.LENGTH_LONG).show();
 
                 } else if (error instanceof ParseError) {
-                    Toast.makeText(ct, "Parse Error " + statusCode, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ct, "Parse Error " + statusCode, Toast.LENGTH_LONG).show();
 
                 } else if (error instanceof TimeoutError) {
-                    Toast.makeText(ct, "Server doesn't respond... " + statusCode, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ct, "Server doesn't respond... ", Toast.LENGTH_LONG).show();
 
                 }
             }
         }) {
 
-            //This is for Headers If You Needed
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
@@ -376,30 +416,22 @@ public class Functions {
                 return headers;
             }
 
-            //Pass Your Parameters here
             @Override
             protected Map<String, String> getParams() {
-
                 return params;
             }
         };
-
         // Adding request to request queue
         MyApplication.getInstance().addToRequestQueue(request);
 
     }
-
-
-
 
     /**
      * Function to logout user
      * Resets the temporary data stored in SQLite Database
      */
     public void logoutUser(Context context) {
-
     }
-
     /**
      * Email Address Validation
      */

@@ -26,14 +26,19 @@ public class LoginActivity extends AppCompatActivity {
 
     private SharedPreferences sp;
 
-
+    private AlertDialog alertDialog;
     private MaterialButton btnLogin, btnLinkToRegister, btnForgotPass;
     private TextInputLayout inputEmail, inputPassword;
 
+    private static LoginActivity instance;
 
+    public static LoginActivity getInstance() {
+        return instance;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+            instance = this;
 
 
             setContentView(R.layout.activity_login);
@@ -57,10 +62,8 @@ public class LoginActivity extends AppCompatActivity {
             String email = Objects.requireNonNull(inputEmail.getEditText()).getText().toString().trim();
             String password = Objects.requireNonNull(inputPassword.getEditText()).getText().toString().trim();
 
-            // Hide Keyboard
             Functions.hideSoftKeyboard(LoginActivity.this);
 
-            // Check for empty data in the form
             if (!email.isEmpty() && !password.isEmpty()) {
                 if (Functions.isValidEmailAddress(email)) {
                     // login user
@@ -69,8 +72,6 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Email is not valid!", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                // Prompt user to enter credentials
-
                 Toast.makeText(getApplicationContext(), "Please enter the credentials!", Toast.LENGTH_LONG).show();
             }
         });
@@ -101,6 +102,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mEditEmail.setErrorEnabled(false);
                 alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(mEditEmail.getEditText().getText().length() > 0);
             }
 
@@ -119,9 +121,9 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (!email.isEmpty()) {
                     if (Functions.isValidEmailAddress(email)) {
-                        Functions.reset(sp, this, email);
-                        enterEmailCodeDialog(email);
-                        dialog.dismiss();
+                        Functions.resetStart(sp, this, email, alertDialog, mEditEmail);
+
+
                     } else {
                         Toast.makeText(getApplicationContext(), "Email is not valid!", Toast.LENGTH_SHORT).show();
                     }
@@ -134,20 +136,22 @@ public class LoginActivity extends AppCompatActivity {
 
         alertDialog.show();
     }
-    private void enterEmailCodeDialog(String email) {
+    public void enterEmailCodeDialog(String email) {
         View dialogView = getLayoutInflater().inflate(R.layout.enter_code, null);
         Button codeNotArrived = dialogView.findViewById(R.id.code_not_arrived);
+        TextInputLayout mEmailCode = dialogView.findViewById(R.id.edit_email);
+        alertDialog = new AlertDialog.Builder(this).setView(dialogView).setTitle("Check Email").setCancelable(false).setPositiveButton("Verify", (dialog, which) -> {
+        }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create();
+
         sp = getSharedPreferences("login", MODE_PRIVATE);
         codeNotArrived.setOnClickListener(view -> {
-            Functions.reset(sp, this, email);
+            Functions.resetStart(sp, this,email, alertDialog, mEmailCode);
             Toast.makeText(getApplicationContext(), "Resending...", Toast.LENGTH_LONG).show();
 
 
         });
-        AlertDialog alertDialog = new AlertDialog.Builder(this).setView(dialogView).setTitle("Check Email").setCancelable(false).setPositiveButton("Verify", (dialog, which) -> {
-        }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create();
 
-        TextInputLayout mEmailCode = dialogView.findViewById(R.id.edit_email);
+
 
         Objects.requireNonNull(mEmailCode.getEditText()).addTextChangedListener(new TextWatcher() {
             @Override
@@ -157,6 +161,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mEmailCode.setErrorEnabled(false);
 
                 alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(mEmailCode.getEditText().getText().length() > 0);
             }
@@ -175,9 +180,11 @@ public class LoginActivity extends AppCompatActivity {
                 String code = mEmailCode.getEditText().getText().toString();
 
                 if (!code.isEmpty()) {
+                    Functions.resetCheck(sp, this, email, code,alertDialog, mEmailCode);
 
-                    dialog.dismiss();
-                    enterNewPasswordsDialog(email, code);
+
+
+
 
                 } else {
                     Toast.makeText(getApplicationContext(), "Fill all values!", Toast.LENGTH_SHORT).show();
@@ -189,7 +196,7 @@ public class LoginActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void enterNewPasswordsDialog(String email, String code) {
+    public void enterNewPasswordsDialog(String email, String code) {
         View dialogView = getLayoutInflater().inflate(R.layout.enter_new_passwords, null);
 
         AlertDialog alertDialog = new AlertDialog.Builder(this).setView(dialogView).setTitle("Enter New Password").setCancelable(false).setPositiveButton("Reset", (dialog, which) -> {
@@ -205,6 +212,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                password1.setErrorEnabled(false);
                 alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(password1.getEditText().getText().length() > 0 && Objects.requireNonNull(password2.getEditText()).getText().length() > 0);
             }
 
@@ -219,6 +227,8 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                password2.setErrorEnabled(false);
+
                 alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(password1.getEditText().getText().length() > 0 && Objects.requireNonNull(password2.getEditText()).getText().length() > 0);
             }
 
@@ -237,9 +247,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (!password.isEmpty() && !repeatPassword.isEmpty()) {
                     if (password.equals(repeatPassword)) {
-                        Functions.resetPassword(sp, this, email, code, password);
-                        dialog.dismiss();
-                        //enterEmailCodeDialog(email);
+                        Functions.resetFinish(sp, this, email, code, password, alertDialog, password1, password2);
 
                     }
                     else {
@@ -259,7 +267,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loginProcess(final String email, final String password) {
         sp = getSharedPreferences("login", MODE_PRIVATE);
-        Functions.login(sp,this, email, password);
+        Functions.login(sp,this, email, password, inputEmail, inputPassword);
 
         /*
 
