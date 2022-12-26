@@ -1,6 +1,12 @@
 package dev.pamparampam.myapplication.radiowezel;
 
+import static dev.pamparampam.myapplication.radiowezel.helper.Functions.OTP_VERIFY_URL;
+import static dev.pamparampam.myapplication.radiowezel.helper.Functions.makeRequest;
+import static dev.pamparampam.myapplication.radiowezel.helper.Functions.showProgressDialog;
+
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -13,6 +19,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.aviran.cookiebar2.CookieBar;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -39,10 +51,10 @@ public class EmailVerify extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email_verify);
 
-        textVerifyCode = findViewById(R.id.verify_code);
-        verifyBtn = findViewById(R.id.btnVerify);
-        resendBtn = findViewById(R.id.btnResendCode);
-        otpCountDown = findViewById(R.id.otpCountDown);
+        textVerifyCode = findViewById(R.id.AEV_verify_code);
+        verifyBtn = findViewById(R.id.AEV_verify_btn);
+        resendBtn = findViewById(R.id.AEV_resend_code_btn);
+        otpCountDown = findViewById(R.id.AEV_count_down);
 
         bundle = getIntent().getExtras();
 
@@ -62,7 +74,33 @@ public class EmailVerify extends AppCompatActivity {
             String code = Objects.requireNonNull(textVerifyCode.getEditText()).getText().toString();
 
             if (!code.isEmpty()) {
-                Functions.isValidVerifyCode(sp, this, code);
+                showProgressDialog(EmailVerify.this, "Verifying...");
+                Map<String, String> params = new HashMap<>();
+
+                params.put("code", code);
+
+                makeRequest(new VolleyCallback() {
+
+                    @Override
+                    public void onSuccess(JSONObject result) {
+                        Intent switchActivityIntent = new Intent(EmailVerify.this, HomeActivity.class);
+
+                        switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+
+                        startActivity(switchActivityIntent);
+
+                    }
+
+                    @Override
+                    public void onError(int code, Map<String, ArrayList<String>> message) {
+                        if (message.containsKey("code")) {
+                            textVerifyCode.setError(String.join("\n", Objects.requireNonNull(message.get("code"))));
+                        }
+
+                    }
+
+                },OTP_VERIFY_URL, params, true, this, sp);
 
 
             } else {
@@ -71,13 +109,42 @@ public class EmailVerify extends AppCompatActivity {
         });
 
         resendBtn.setEnabled(false);
-        resendBtn.setOnClickListener(v -> Functions.resendEmailVerifyCode(sp, this));
+        resendBtn.setOnClickListener(v -> {
+            Map<String, String> params = new HashMap<>();
+
+            makeRequest(new VolleyCallback() {
+
+                @Override
+                public void onSuccess(JSONObject result) {
+                    CookieBar.build(EmailVerify.this)
+                            .setTitle("Resend!")
+                            .setDuration(1500)
+                            .setBackgroundColor(R.color.successShine)
+                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .show();
+
+                }
+
+                @Override
+                public void onError(int code, Map<String, ArrayList<String>> message) {
+                    CookieBar.build(EmailVerify.this)
+                            .setTitle("Unexpected, report this.")
+                            .setDuration(1500)
+                            .setBackgroundColor(R.color.actionErrorShine)
+                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .show();
+
+                }
+
+
+            },Functions.RESEND_VERIFY_MAIL, params, true, this, sp);
+        });
 
         countDown();
     }
 
     private void countDown() {
-        new CountDownTimer(5000, 1000) { // adjust the milli seconds here
+        new CountDownTimer(10000, 1000) { // adjust the milli seconds here
 
             @SuppressLint({"SetTextI18n", "DefaultLocale"})
             public void onTick(long millisUntilFinished) {
@@ -95,7 +162,7 @@ public class EmailVerify extends AppCompatActivity {
 
 
     private void showDialog(String title) {
-        Functions.showProgressDialog(EmailVerify.this, title);
+        showProgressDialog(EmailVerify.this, title);
     }
 
     private void hideDialog() {

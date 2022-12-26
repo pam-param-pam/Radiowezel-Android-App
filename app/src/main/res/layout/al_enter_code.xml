@@ -8,7 +8,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:id="@+id/edit_email"
+        android:id="@+id/al_EC_email_code_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
@@ -18,10 +18,20 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_email"
-            android:inputType="textEmailAddress"
+            android:hint="@string/al_EC_code_input_HINT"
+            android:inputType="number"
             android:padding="20dp"/>
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/al_code_not_arrived_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textAllCaps="false"
+        android:text="@string/al_code_not_arrived_btn_TEXT"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/al_EC_email_code_input" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

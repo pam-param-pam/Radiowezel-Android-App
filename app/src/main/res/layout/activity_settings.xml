@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
@@ -15,9 +14,8 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_margin="5dp"/>
 
-    <!-- RelativeLayout places views with respect to each other -->
     <RelativeLayout
-        android:id="@+id/settings_profile_view"
+        android:id="@+id/AS_settings_profile_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,30 +27,30 @@
 
 
         <ImageView
-            android:id="@+id/video_thumbnail"
+            android:id="@+id/AS_video_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:src="@mipmap/ic_launcher" />
 
         <TextView
-            android:id="@+id/settings_email"
+            android:id="@+id/AS_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="@string/settings_email"
+            android:text="@string/AS_email_TEXT"
             android:textAppearance="@style/TextAppearance.AppCompat"
             android:textSize="30sp"
             android:textStyle="normal|bold"
             android:ellipsize="end"
             android:maxLines="1"
-            android:layout_below="@+id/video_thumbnail" />
+            android:layout_below="@+id/AS_video_thumbnail" />
 
         <TextView
-            android:id="@+id/settings_username"
-            android:text="@string/settings_username"
+            android:id="@+id/AS_username"
+            android:text="@string/AS_username_TEXT"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/settings_email"
+            android:layout_below="@+id/AS_email"
             android:textAppearance="@style/TextAppearance.AppCompat"
             android:fontFamily="sans-serif-condensed"
             android:textStyle="normal|italic"
@@ -64,19 +62,19 @@
             android:id="@+id/settings_first_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/settings_username"
-            android:text="@string/settings_first_name"
+            android:layout_below="@+id/AS_username"
+            android:text="@string/AS_first_name_TEXT"
             android:textAppearance="@style/TextAppearance.AppCompat"
             android:textSize="20sp"
             android:ellipsize="end"
             android:maxLines="1" />
 
         <TextView
-            android:id="@+id/settings_last_name"
+            android:id="@+id/AS_last_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/settings_first_name"
-            android:text="@string/settings_last_name"
+            android:text="@string/AS_last_name_TEXT"
             android:textAppearance="@style/TextAppearance.AppCompat"
             android:textSize="20sp"
             android:ellipsize="end"
@@ -95,7 +93,7 @@
         android:textColor="@color/white"
         app:backgroundTint="@color/colorPrimary"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_profile_view" />
+        app:layout_constraintTop_toBottomOf="@id/AS_settings_profile_view" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/logout"

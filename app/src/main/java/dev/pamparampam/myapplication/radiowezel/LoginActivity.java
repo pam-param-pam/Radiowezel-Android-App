@@ -1,5 +1,10 @@
 package dev.pamparampam.myapplication.radiowezel;
 
+import static dev.pamparampam.myapplication.radiowezel.helper.Functions.OTP_VERIFY_URL;
+import static dev.pamparampam.myapplication.radiowezel.helper.Functions.RESET_CHECK_URL;
+import static dev.pamparampam.myapplication.radiowezel.helper.Functions.makeRequest;
+import static dev.pamparampam.myapplication.radiowezel.helper.Functions.showProgressDialog;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,7 +12,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,10 +19,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.aviran.cookiebar2.CookieBar;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
-
-import java.util.Objects;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -39,17 +49,27 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
             instance = this;
+            sp = getSharedPreferences("login",MODE_PRIVATE);
+
+            if(sp.getBoolean("logged",false)){
 
 
-            setContentView(R.layout.activity_login);
+                Intent switchActivityIntent = new Intent(this, HomeActivity.class);
+                startActivity(switchActivityIntent);
+            }
+            else {
 
-            inputEmail = findViewById(R.id.edit_email);
-            inputPassword = findViewById(R.id.edit_password);
-            btnLogin = findViewById(R.id.button_login);
-            btnLinkToRegister = findViewById(R.id.button_register);
-            btnForgotPass = findViewById(R.id.button_reset);
+                setContentView(R.layout.activity_login);
 
-            init();
+                inputEmail = findViewById(R.id.AL_email_input);
+                inputPassword = findViewById(R.id.AL_password_input);
+                btnLogin = findViewById(R.id.AL_login_btn);
+                btnLinkToRegister = findViewById(R.id.AL_register_btn);
+                btnForgotPass = findViewById(R.id.AL_reset_btn);
+
+                init();
+            }
+
 
 
     }
@@ -65,14 +85,16 @@ public class LoginActivity extends AppCompatActivity {
             Functions.hideSoftKeyboard(LoginActivity.this);
 
             if (!email.isEmpty() && !password.isEmpty()) {
-                if (Functions.isValidEmailAddress(email)) {
                     // login user
                     loginProcess(email, password);
-                } else {
-                    Toast.makeText(getApplicationContext(), "Email is not valid!", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getApplicationContext(), "Please enter the credentials!", Toast.LENGTH_LONG).show();
+            }
+            else {
+                CookieBar.build(LoginActivity.this)
+                        .setTitle("Please enter the credentials!")
+                        .setDuration(1500)
+                        .setBackgroundColor(R.color.errorShine)
+                        .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                        .show();
             }
         });
 
@@ -83,17 +105,17 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         // Forgot Password Dialog
-        btnForgotPass.setOnClickListener(v -> forgotPasswordDialog());
+        btnForgotPass.setOnClickListener(view -> forgotPasswordDialog());
     }
 
     private void forgotPasswordDialog() {
         sp = getSharedPreferences("login", MODE_PRIVATE);
-        View dialogView = getLayoutInflater().inflate(R.layout.enter_email, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.al_enter_email, null);
 
         AlertDialog alertDialog = new AlertDialog.Builder(this).setView(dialogView).setTitle("Forgot Password").setCancelable(false).setPositiveButton("Reset", (dialog, which) -> {
         }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create();
 
-        TextInputLayout mEditEmail = dialogView.findViewById(R.id.edit_email);
+        TextInputLayout mEditEmail = dialogView.findViewById(R.id.al_EE_email_input);
 
         Objects.requireNonNull(mEditEmail.getEditText()).addTextChangedListener(new TextWatcher() {
             @Override
@@ -121,14 +143,25 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (!email.isEmpty()) {
                     if (Functions.isValidEmailAddress(email)) {
-                        Functions.resetStart(sp, this, email, alertDialog, mEditEmail);
+
+                        resetStart(sp, email, alertDialog, mEditEmail);
 
 
                     } else {
-                        Toast.makeText(getApplicationContext(), "Email is not valid!", Toast.LENGTH_SHORT).show();
+                        CookieBar.build(LoginActivity.this)
+                                .setTitle("Email is not valid!")
+                                .setDuration(1500)
+                                .setBackgroundColor(R.color.errorShine)
+                                .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                                .show();
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Fill all values!", Toast.LENGTH_SHORT).show();
+                    CookieBar.build(LoginActivity.this)
+                            .setTitle("Fill all values!")
+                            .setDuration(1500)
+                            .setBackgroundColor(R.color.errorShine)
+                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .show();
                 }
 
             });
@@ -136,17 +169,48 @@ public class LoginActivity extends AppCompatActivity {
 
         alertDialog.show();
     }
+
+    private void resetStart(SharedPreferences sp, String email, AlertDialog alertDialog, TextInputLayout mEditEmail) {
+        showProgressDialog(LoginActivity.this, "Sending email...");
+        Map<String, String> params = new HashMap<>();
+        params.put("email", email);
+        makeRequest(new VolleyCallback() {
+
+            @Override
+            public void onSuccess(JSONObject result) {
+                LoginActivity.getInstance().enterEmailCodeDialog(email);
+
+                alertDialog.dismiss();
+
+            }
+
+            @Override
+            public void onError(int code, Map<String, ArrayList<String>> message) {
+                if (message.containsKey("email")) {
+                    mEditEmail.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
+                }
+            }
+
+
+        },Functions.RESET_START_URL, params, false, this, sp);
+    }
+
     public void enterEmailCodeDialog(String email) {
-        View dialogView = getLayoutInflater().inflate(R.layout.enter_code, null);
-        Button codeNotArrived = dialogView.findViewById(R.id.code_not_arrived);
-        TextInputLayout mEmailCode = dialogView.findViewById(R.id.edit_email);
+        View dialogView = getLayoutInflater().inflate(R.layout.al_enter_code, null);
+        Button codeNotArrived = dialogView.findViewById(R.id.al_code_not_arrived_btn);
+        TextInputLayout mEmailCode = dialogView.findViewById(R.id.al_EC_email_code_input);
         alertDialog = new AlertDialog.Builder(this).setView(dialogView).setTitle("Check Email").setCancelable(false).setPositiveButton("Verify", (dialog, which) -> {
         }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create();
 
         sp = getSharedPreferences("login", MODE_PRIVATE);
         codeNotArrived.setOnClickListener(view -> {
-            Functions.resetStart(sp, this,email, alertDialog, mEmailCode);
-            Toast.makeText(getApplicationContext(), "Resending...", Toast.LENGTH_LONG).show();
+            resetStart(sp, email, alertDialog, mEmailCode);
+            CookieBar.build(LoginActivity.this)
+                    .setTitle("Resending...")
+                    .setDuration(1500)
+                    .setBackgroundColor(R.color.successShine)
+                    .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                    .show();
 
 
         });
@@ -180,14 +244,45 @@ public class LoginActivity extends AppCompatActivity {
                 String code = mEmailCode.getEditText().getText().toString();
 
                 if (!code.isEmpty()) {
-                    Functions.resetCheck(sp, this, email, code,alertDialog, mEmailCode);
+                    showProgressDialog(LoginActivity.this, "Checking...");
+                    Map<String, String> params = new HashMap<>();
+
+                    params.put("email", email);
+                    params.put("code", code);
+
+                    makeRequest(new VolleyCallback() {
+
+                        @Override
+                        public void onSuccess(JSONObject result) {
+                            LoginActivity.getInstance().enterNewPasswordsDialog(email, code);
+                            alertDialog.dismiss();
+
+                        }
+
+                        @Override
+                        public void onError(int code, Map<String, ArrayList<String>> message) {
+                            if (message.containsKey("code")) {
+                                mEmailCode.setError(String.join("\n", Objects.requireNonNull(message.get("code"))));
+                            }
+                            if (message.containsKey("email")) {
+                                mEmailCode.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
+                            }
+                        }
+
+
+                    },RESET_CHECK_URL, params, true, this, sp);
 
 
 
 
 
                 } else {
-                    Toast.makeText(getApplicationContext(), "Fill all values!", Toast.LENGTH_SHORT).show();
+                    CookieBar.build(LoginActivity.this)
+                            .setTitle("Fill all values!")
+                            .setDuration(1500)
+                            .setBackgroundColor(R.color.errorShine)
+                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .show();
                 }
 
             });
@@ -197,13 +292,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void enterNewPasswordsDialog(String email, String code) {
-        View dialogView = getLayoutInflater().inflate(R.layout.enter_new_passwords, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.al_enter_new_passwords, null);
 
         AlertDialog alertDialog = new AlertDialog.Builder(this).setView(dialogView).setTitle("Enter New Password").setCancelable(false).setPositiveButton("Reset", (dialog, which) -> {
         }).setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create();
 
-        TextInputLayout password1 = dialogView.findViewById(R.id.new_password1);
-        TextInputLayout password2 = dialogView.findViewById(R.id.new_password2);
+        TextInputLayout password1 = dialogView.findViewById(R.id.al_ENP_new_password_input);
+        TextInputLayout password2 = dialogView.findViewById(R.id.al_ENP_repeat_new_password);
 
         Objects.requireNonNull(password1.getEditText()).addTextChangedListener(new TextWatcher() {
             @Override
@@ -247,15 +342,61 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (!password.isEmpty() && !repeatPassword.isEmpty()) {
                     if (password.equals(repeatPassword)) {
-                        Functions.resetFinish(sp, this, email, code, password, alertDialog, password1, password2);
+
+                        showProgressDialog(LoginActivity.this, "Reseting...");
+                        Map<String, String> params = new HashMap<>();
+                        params.put("email", email);
+                        params.put("code", code);
+                        params.put("new_password", password);
+                        makeRequest(new VolleyCallback() {
+
+                            @Override
+                            public void onSuccess(JSONObject result) {
+
+                                CookieBar.build(LoginActivity.this)
+                                        .setTitle("Password reset")
+                                        .setDuration(1500)
+                                        .setBackgroundColor(R.color.successShine)
+                                        .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                                        .show();                                alertDialog.dismiss();
+
+                            }
+
+                            @Override
+                            public void onError(int code, Map<String, ArrayList<String>> message) {
+                                if (message.containsKey("new_password")) {
+                                    password1.setError(String.join("\n", Objects.requireNonNull(message.get("new_password"))));
+                                    password2.setError(String.join("\n", Objects.requireNonNull(message.get("new_password"))));
+
+                                }
+                                if (message.containsKey("non_field_errors")) {
+                                    password1.setError(String.join("\n", Objects.requireNonNull(message.get("non_field_errors"))));
+                                    password2.setError(String.join("\n", Objects.requireNonNull(message.get("non_field_errors"))));
+
+                                }
+
+                            }
+
+
+                        },Functions.RESET_FINISH_URL, params, false, this, sp);
 
                     }
                     else {
-                        Toast.makeText(getApplicationContext(), "Passwords are not the same!", Toast.LENGTH_SHORT).show();
+                        CookieBar.build(LoginActivity.this)
+                                .setTitle("Passwords are not the same!")
+                                .setDuration(1500)
+                                .setBackgroundColor(R.color.errorShine)
+                                .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                                .show();
 
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Fill all values!", Toast.LENGTH_SHORT).show();
+                    CookieBar.build(LoginActivity.this)
+                            .setTitle("Fill all values!")
+                            .setDuration(1500)
+                            .setBackgroundColor(R.color.errorShine)
+                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .show();
                 }
 
             });
@@ -267,28 +408,67 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loginProcess(final String email, final String password) {
         sp = getSharedPreferences("login", MODE_PRIVATE);
-        Functions.login(sp,this, email, password, inputEmail, inputPassword);
+        Map<String, String> params = new HashMap<>();
+        params.put("username", email);
+        params.put("password", password);
+        makeRequest(new VolleyCallback() {
+            @Override
+            public void onSuccess(JSONObject result) {
+                String token = result.optString("access");
+                sp.edit().putString("token", token).apply();
 
-        /*
+                String refresh = result.optString("refresh");
+                sp.edit().putString("refresh", refresh).apply();
+
+                sp.edit().putBoolean("logged", true).apply();
+
+                int lifetime = result.optInt("lifetime");
+                sp.edit().putInt("token_lifetime", lifetime).apply();
+
+                String username = result.optString("username");
+                sp.edit().putString("username", username).apply();
+
+                String email = result.optString("email");
+                sp.edit().putString("email", email).apply();
+
+                String first_name = result.optString("first_name");
+                sp.edit().putString("first_name", first_name).apply();
+
+                String last_name = result.optString("last_name");
+                sp.edit().putString("last_name", last_name).apply();
 
 
-        new Login().hashPassword(password);
+                Intent switchActivityIntent = new Intent(LoginActivity.this, HomeActivity.class);
+
+                switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                finish();
+                startActivity(switchActivityIntent);
+            }
+
+            @Override
+            public void onError(int code, Map<String, ArrayList<String>> message) {
+                if (message.containsKey("detail")) {
+                    inputPassword.setError(String.join("\n", Objects.requireNonNull(message.get("detail"))));
+                    inputEmail.setError(String.join("\n", Objects.requireNonNull(message.get("detail"))));
+
+                }
+                if (message.containsKey("password")) {
+                    inputPassword.setError(String.join("\n", Objects.requireNonNull(message.get("password"))));
+
+                }
+                if (message.containsKey("email")) {
+                    inputEmail.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
+
+                }
+
+            }
+        },Functions.LOGIN_URL, params, false, this, sp);
 
 
-        Intent switchActivityIntent = new Intent(this, HomeActivity.class);
-        hideDialog();
-        switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        finish();
-        startActivity(switchActivityIntent);
-        */
     }
 
-
-
-
-
     private void showDialog(String title) {
-        Functions.showProgressDialog(LoginActivity.this, title);
+        showProgressDialog(LoginActivity.this, title);
     }
 
     private void hideDialog() {

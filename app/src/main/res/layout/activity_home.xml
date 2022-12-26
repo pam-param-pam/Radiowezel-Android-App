@@ -1,22 +1,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="20dp"
     android:id="@+id/RLM">
 
+
+
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
+        android:id="@+id/AH_songs_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/card_view"
+        android:layout_below="@id/AH_song_card_view"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="1dp" />
 
+
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_view"
+        android:id="@+id/AH_song_card_view"
         android:layout_width="match_parent"
         android:layout_height="140dp"
         android:layout_alignParentStart="true"
@@ -29,46 +33,87 @@
             android:layout_height="match_parent">
 
             <ImageButton
-                android:id="@+id/play"
+                android:id="@+id/AH_play_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="48dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginTop="10dp"
+                android:contentDescription="@string/todo"
+                app:layout_constraintEnd_toStartOf="@+id/AH_pause_btn"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.494"
                 app:srcCompat="@android:drawable/ic_media_play"
-                tools:ignore="SpeakableTextPresentCheck"
-                android:contentDescription="@string/todo" />
+                tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton
-                android:id="@+id/next"
+                android:id="@+id/AH_pause_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="25dp"
-                app:layout_constraintStart_toEndOf="@+id/play"
-                app:layout_constraintTop_toTopOf="@+id/play"
+                android:layout_marginTop="10dp"
+                android:contentDescription="@string/todo"
+                app:layout_constraintEnd_toStartOf="@+id/AH_next_btn"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/AH_play_btn"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@android:drawable/ic_media_pause"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/AH_next_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:contentDescription="@string/todo"
+                app:layout_constraintEnd_toStartOf="@+id/AH_microphone_btn"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/AH_pause_btn"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@android:drawable/ic_media_next"
-                tools:ignore="SpeakableTextPresentCheck"
-                android:contentDescription="@string/todo" />
+                tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton
-                android:id="@+id/microphone"
+                android:id="@+id/AH_microphone_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="25dp"
-                app:layout_constraintBottom_toBottomOf="@+id/next"
-                app:layout_constraintStart_toEndOf="@+id/next"
+                android:layout_marginTop="10dp"
+                android:contentDescription="@string/todo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/AH_next_btn"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@android:drawable/ic_btn_speak_now"
-                tools:ignore="SpeakableTextPresentCheck"
-                android:contentDescription="@string/todo" />
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <SeekBar
+                android:id="@+id/AH_position_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="25dp"
+                android:layout_marginBottom="10dp"
+
+
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <EditText
+                android:id="@+id/AH_title_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:foregroundGravity="center"
+                android:gravity="center_horizontal"
+                android:inputType="text"
+                android:text="@string/AH_title_text"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toTopOf="@+id/AH_position_seekbar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/search_btn"
+        android:id="@+id/AH_search_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -82,7 +127,7 @@
         android:contentDescription="@string/todo" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/settings_btn"
+        android:id="@+id/AH_settings_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"

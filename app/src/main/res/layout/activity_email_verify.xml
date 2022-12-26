@@ -7,7 +7,7 @@
     android:layout_margin="16dp">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/verify_code"
+        android:id="@+id/AEV_verify_code"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp">
@@ -16,19 +16,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="20dp"
-            android:hint="Verification Code"
+            android:hint="@string/AEV_verification_code_HINT"
             android:inputType="number"
             android:maxLength="6" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnVerify"
+        android:id="@+id/AEV_verify_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:backgroundTint="@color/colorPrimary"
         android:textColor="@color/white"
-        android:text="Verify"/>
+        android:text="@string/AEV_verify_btn_TEXT"/>
 
     <com.google.android.material.button.MaterialButton
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -36,11 +36,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:textColor="@color/borderless_button"
-        android:text="Resend Code"
-        android:id="@+id/btnResendCode" />
+        android:text="@string/AEV_resend_code_TEXT"
+        android:id="@+id/AEV_resend_code_btn" />
 
     <TextView
-        android:id="@+id/otpCountDown"
+        android:id="@+id/AEV_count_down"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"

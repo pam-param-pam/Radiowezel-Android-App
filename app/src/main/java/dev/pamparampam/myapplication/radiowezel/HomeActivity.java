@@ -1,15 +1,18 @@
 package dev.pamparampam.myapplication.radiowezel;
 
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
@@ -19,8 +22,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
-
-import android.widget.Toast;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -30,7 +33,14 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.aviran.cookiebar2.CookieBar;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,26 +50,30 @@ import java.util.Locale;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.helper.Responder;
+import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
+
 
 
 public class HomeActivity extends AppCompatActivity implements StartDragListener {
     private static final String TAG = HomeActivity.class.getSimpleName();
 
     private FloatingActionButton settingsBtn, searchBtn;
-    private ImageButton microphoneBtn, playBtn, nextBtn;
+    private ImageButton microphoneBtn, playBtn, nextBtn, pauseBtn;
     private RecyclerViewAdapter mAdapter;
     private ItemTouchHelper touchHelper;
     private HashMap<String, String> user = new HashMap<>();
     private RecyclerView recyclerView;
     private MediaRecorder mediaRecorder;
     private List<Item> list;
-
+    private SharedPreferences sp;
+    private SeekBar positionBar;
     private AudioRecord audioRecord;
     private AudioTrack audioTrack;
-
+    private WebSocket ws;
+    private TextView title;
     private int intBufferSize;
     private short[] shortAudioData;
-
     private int intGain;
     private boolean isRecording = false;
 
@@ -111,28 +125,34 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_home);
 
-        microphoneBtn = findViewById(R.id.microphone);
-        playBtn = findViewById(R.id.play);
-        nextBtn = findViewById(R.id.next);
+        microphoneBtn = findViewById(R.id.AH_microphone_btn);
+        playBtn = findViewById(R.id.AH_play_btn);
+        pauseBtn = findViewById(R.id.AH_pause_btn);
+
+        nextBtn = findViewById(R.id.AH_next_btn);
+        positionBar = findViewById(R.id.AH_position_seekbar);
+
+        settingsBtn = findViewById(R.id.AH_settings_btn);
+        searchBtn = findViewById(R.id.AH_search_btn);
+        title = findViewById(R.id.AH_title_text);
 
 
-        settingsBtn = findViewById(R.id.settings_btn);
-        searchBtn = findViewById(R.id.search_btn);
-
-
-
-        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView = findViewById(R.id.AH_songs_recycler_view);
 
         System.out.println("BUILDING RECYCLER VIEW AGAIN FROM SCRATCH!");
+        init();
         buildRecyclerView();
+
+
 
 
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        init();
+
 
 
     }
@@ -143,21 +163,31 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
     private void buildRecyclerView() {
 
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject()
+                    .put("worker", "queue")
+                    .put("action", "get").put("taskId", 100_000);
 
+            ws.send(jsonObject);
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         // TODO: 24.10.2022
         //proper generating of recycler view
         if(list == null){
             RelativeLayout layout = findViewById(R.id.RLM);
-            String[] titles = getResources().getStringArray(R.array.music_titles);
-            String[] descriptions = getResources().getStringArray(R.array.music_desc);
-            int[] image = new int[]{R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
 
             list = new ArrayList<>();
-            for (int i = 0; i < titles.length; i++) {
-                list.add(new Item(image[i], titles[i], descriptions[i]));
-            }
-            mAdapter = new RecyclerViewAdapter(this, this, layout, list);
+
+            Item item = new Item("https://img.freepik.com/premium-vector/system-software-update-upgrade-concept-loading-process-screen-vector-illustration_175838-2182.jpg?w=2000", "Loading...","ID", "CEO OF SLOW INTERNET", "LENGTH");
+            list.add(item);
+            sp = getSharedPreferences("login",MODE_PRIVATE);
+
+            mAdapter = new RecyclerViewAdapter(this, sp, this, layout, list, HomeActivity.this);
             ItemTouchHelper.Callback callback = new ItemMoveCallback(mAdapter);
 
             touchHelper = new ItemTouchHelper(callback);
@@ -222,6 +252,64 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
     }
     private void init() {
+        sp = getSharedPreferences("login",MODE_PRIVATE);
+        System.out.println("innit called");
+
+        ws = new WebSocket(sp, "ws://192.168.1.14:8000/test");
+        /* global listener */
+        ws.addListener(new Responder() {
+            @Override
+            public void receive(String message) throws JsonProcessingException, JSONException {
+                System.out.println("AAAAAAAAAAAA");
+                System.out.println(message);
+                try {
+                    JSONObject obj = new JSONObject(message);
+                    String pos = obj.getString("pos");
+                    String titleText = obj.getString("title");
+
+
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                positionBar.setProgress(Integer.parseInt(pos), true);
+                            }
+                            title.setText(titleText);
+
+
+                        }
+                    });
+
+
+
+                }
+                catch(JSONException se) {
+                    try {
+                        JSONObject obj = new JSONObject(message);
+
+                        final ObjectMapper objectMapper = new ObjectMapper();
+                        List<Item> songList = objectMapper.readValue(obj.get("queue").toString(), new TypeReference<List<Item>>() {
+                        });
+
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+
+                                mAdapter.setmList(songList);
+
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+
+                    }
+                }
+            }
+        }, 100_000);
+
 
         settingsBtn.setOnClickListener(v -> {
             Intent i = new Intent(HomeActivity.this, SettingsActivity.class);
@@ -231,23 +319,152 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         });
         searchBtn.setOnClickListener(v -> {
             Intent i = new Intent(HomeActivity.this, SearchActivity.class);
+
             startActivity(i);
             overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 
         });
 
         microphoneBtn.setOnClickListener(v -> {
-            if (isRecording) {
-                buttonStop(microphoneBtn);
+
+            CookieBar.build(HomeActivity.this)
+                    .setTitle("TITLE")
+                    .setMessage("MESSAGE")
+                    .setDuration(1000)
+                    .setBackgroundColor(R.color.successShine)
+                    .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                    .show();
+
+        });
+        Responder responder = new Responder() {
+            @Override
+            public void receive(String message) throws JsonProcessingException, JSONException {
+                CookieBar.dismiss(HomeActivity.this);
+
+                super.receive(message);
+                System.out.println(message);
+
+                JSONObject obj = new JSONObject(message);
+                CookieBar.Builder cookieBar = CookieBar.build(HomeActivity.this).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());
+                switch(obj.get("status").toString()) {
+                    case "success":
+                        cookieBar.setBackgroundColor(R.color.successShine);
+                        cookieBar.setIcon(R.drawable.ic_success_shine);
+                        break;
+                    case "warning":
+                        cookieBar.setBackgroundColor(R.color.warningShine);
+                        cookieBar.setIcon(R.drawable.ic_warning_shine);
+
+                        break;
+                    case "error":
+                        cookieBar.setBackgroundColor(R.color.errorShine);
+                        cookieBar.setIcon(R.drawable.ic_error_shine);
+
+                        break;
+                    default:
+                        cookieBar.setBackgroundColor(R.color.actionErrorShine);
+                        cookieBar.setIcon(R.drawable.ic_error_retro);
+
+                        cookieBar.setMessage("Unexpected, report this.");
+                }
+
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        cookieBar.show();
+
+                    }
+                });
 
             }
-            else {
-                buttonStart(playBtn);
+        };
+        /*
+        positionBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int taskId = Functions.randInt();
+
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject()
+                            .put("worker", "player")
+                            .put("action", "seek").put("extras", new JSONObject()
+                                    .put("seconds", seekBar.getProgress()))
+                            .put("taskId", taskId);
+                    ws.addListener(responder, taskId);
+
+                    ws.send(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
+        */
 
+        playBtn.setOnClickListener(v -> {
+            int taskId = Functions.randInt();
 
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject()
+                        .put("worker", "player")
+                        .put("action", "play")
+                        .put("taskId", taskId);
+                ws.addListener(responder, taskId);
+
+                ws.send(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        pauseBtn.setOnClickListener(v -> {
+            int taskId = Functions.randInt();
+
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject()
+                        .put("worker", "player")
+                        .put("action", "pause")
+                        .put("taskId", taskId);
+                ws.addListener(responder, taskId);
+                ws.send(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        nextBtn.setOnClickListener(v -> {
+            int taskId = Functions.randInt();
+
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject()
+                        .put("worker", "player")
+                        .put("action", "next")
+                        .put("taskId", taskId);
+                ws.addListener(responder, taskId);
+                ws.send(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 
@@ -287,7 +504,8 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         if (filteredList.isEmpty()) {
             // if no item is added in filtered list we are
             // displaying a toast message as no data found.
-            Toast.makeText(this, "No Data Found..", Toast.LENGTH_SHORT).show();
+            //LGSnackbarManager.show(WARNING, "No data found...");
+
         } else {
             // at last we are passing that filtered
             // list to our adapter class.

@@ -1,28 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This layout defines how the activity should look when a video is clicked and it is played in this activity -->
 
-<!-- LinearLayout stacks the views one after the other which in this case is vertical orientation -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <!-- The YouTubePlayerView view helps to load the video from the id 
-    set to it from its cue video() method which just loads the video -->
+
     <com.google.android.youtube.player.YouTubePlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <!-- This TextView displays the title of video -->
-    <!-- This view has has the following properties:
-            -maxLines for the maximum no of lines that the view can use
-            -fonts for special look
-            -layout_margin for margin from all sides
-     -->
+
     <TextView
-        android:id="@+id/player_title"
-        android:text="@string/video_title"
+        android:id="@+id/AP_player_title"
+        android:text="@string/AP_video_title_TEXT"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="4"
@@ -31,30 +23,25 @@
         android:textSize="24sp"
         android:layout_margin="10dp" />
 
-    <!-- This TextView displays the ID of video -->
     <TextView
-        android:id="@+id/player_id"
-        android:text="@string/video_id"
+        android:id="@+id/AP_player_id"
+        android:text="@string/AP_video_id_TEXT"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textSize="18sp" />
 
-    <!-- This TextView displays the description of video -->
-    <!-- This view has has the following properties:
-            -maxLines set to 15 so whole of description can be seen
-     -->
     <TextView
-        android:id="@+id/player_description"
-        android:text="@string/video_description"
+        android:id="@+id/AP_player_description"
+        android:text="@string/AP_video_description_TEXT"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="15"
         android:layout_margin="10dp" />
 
     <ImageButton
-        android:id="@+id/add_new_video_btn"
+        android:id="@+id/AP_add_new_video_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:src="@android:drawable/ic_input_add"

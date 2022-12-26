@@ -2,17 +2,16 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/CLM"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:padding="16dp">
 
     <EditText
-        android:id="@+id/search_input"
+        android:id="@+id/AY_search_youtube_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/search_youtube"
+        android:hint="@string/AY_search_youtube_input_HINT"
         android:imeOptions="actionSearch"
         android:inputType="text"
         android:maxLines="1"
@@ -22,12 +21,12 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/videos_recycler_view"
+        android:id="@+id/AY_videos_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="100dp"
         android:dividerHeight="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_input" />
+        app:layout_constraintTop_toBottomOf="@+id/AY_search_youtube_input" />
 </androidx.constraintlayout.widget.ConstraintLayout>

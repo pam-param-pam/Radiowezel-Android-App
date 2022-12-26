@@ -1,11 +1,17 @@
 package dev.pamparampam.myapplication.radiowezel;
 
+//import static greco.lorenzo.com.lgsnackbar.style.LGSnackBarTheme.SnackbarStyle.SUCCESS;
+//import static greco.lorenzo.com.lgsnackbar.style.LGSnackBarTheme.SnackbarStyle.WARNING;
+import static com.google.android.material.internal.ContextUtils.getActivity;
+import static xdroid.toaster.Toaster.toast;
+
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 
 
-import android.graphics.Canvas;
-import android.graphics.Color;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,86 +25,44 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.squareup.picasso.Picasso;
 
 import org.apache.commons.lang3.StringUtils;
+import org.aviran.cookiebar2.CookieBar;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.helper.Responder;
+import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
+//import greco.lorenzo.com.lgsnackbar.LGSnackbarManager;
 
 
 //Adapter class for RecyclerView of videos
-public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHolder> implements ItemMoveCallback.ItemTouchHelperContract{
+public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHolder>{
 
     private Context mContext;
     private List<VideoItem> mVideoList;
     private ConstraintLayout layout;
-
-
+    private WebSocket ws;
+    private SharedPreferences sp;
+    private Activity activity;
     //Parameterised Constructor to save the Activity context and video list
     //helps in initializing a object for this class
-    public YoutubeAdapter(ConstraintLayout layout, Context mContext, List<VideoItem> mVideoList) {
+    public YoutubeAdapter(ConstraintLayout layout, Context mContext, List<VideoItem> mVideoList, SharedPreferences sp, Activity activity) {
         this.mContext = mContext;
         this.mVideoList = mVideoList;
         this.layout = layout;
+        this.sp = sp;
+        this.activity = activity;
     }
 
 
-    @Override
-    public void onRowMoved(int fromPosition, int toPosition) {
 
-    }
-
-    @Override
-    public void onRowSelected(RecyclerViewAdapter.MyViewHolder myViewHolder) {
-        myViewHolder.cardView.setCardBackgroundColor(Color.LTGRAY);
-
-    }
-
-    @Override
-    public void onRowClear(RecyclerViewAdapter.MyViewHolder myViewHolder) {
-        myViewHolder.cardView.setCardBackgroundColor(Color.WHITE);
-
-    }
-
-    @Override
-    public void onRowSwiped(int position) {
-
-        String name = mVideoList.get(position).getTitle();
-
-        // backup of removed item for undo
-        final VideoItem deletedItem = mVideoList.get(position);
-
-        // remove the item from recyclerview
-        removeItem(position);
-        // showing snack-bar for undo
-        Snackbar snackbar = Snackbar.make(layout, name + " Removed!", Snackbar.LENGTH_LONG);
-        snackbar.setAction("UNDO", v -> restoreItem(deletedItem, position));
-        snackbar.setActionTextColor(Color.GREEN);
-        snackbar.show();
-    }
-
-    @Override
-    public void onRowDraw(Canvas c, RecyclerView recyclerView, RecyclerViewAdapter.MyViewHolder myViewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-
-    }
-
-    @Override
-    public void onRowDrawOver(Canvas c, RecyclerView recyclerView, RecyclerViewAdapter.MyViewHolder myViewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-
-    }
-    public void removeItem(int position) {
-        mVideoList.remove(position);
-        // this will update recyclerview means refresh it
-        notifyItemRemoved(position);
-    }
-
-    public void restoreItem(VideoItem videoItem, int position) {
-        mVideoList.add(position, videoItem);
-        notifyItemInserted(position);
-    }
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
@@ -111,7 +75,7 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         // create a new view
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.video_item, parent, false);
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.ay_video_item, parent, false);
 
         return new MyViewHolder(itemView);
     }
@@ -126,19 +90,72 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         final VideoItem singleVideo = mVideoList.get(position);
 
         //replace the default text with id, title and description with setText method
-        holder.video_id.setText("Video ID : "+singleVideo.getId()+" ");
+        holder.video_id.setText("Video ID : "+singleVideo.getId());
         holder.video_title.setText(singleVideo.getTitle());
         holder.video_description.setText(singleVideo.getDescription());
 
+
+        Responder responder = new Responder() {
+            @Override
+            public void receive(String message) throws JsonProcessingException, JSONException {
+
+                JSONObject obj = new JSONObject(message);
+                CookieBar.Builder cookieBar = CookieBar.build(activity).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());
+                switch(obj.get("status").toString()) {
+                    case "success":
+                        cookieBar.setBackgroundColor(R.color.successShine);
+                        cookieBar.setIcon(R.drawable.ic_success_shine);
+                        break;
+                    case "warning":
+                        cookieBar.setBackgroundColor(R.color.warningShine);
+                        cookieBar.setIcon(R.drawable.ic_warning_shine);
+
+                        break;
+                    case "error":
+                        cookieBar.setBackgroundColor(R.color.errorShine);
+                        cookieBar.setIcon(R.drawable.ic_error_shine);
+
+                        break;
+                    default:
+                        cookieBar.setBackgroundColor(R.color.actionErrorShine);
+                        cookieBar.setIcon(R.drawable.ic_error_retro);
+
+                        cookieBar.setMessage("Unexpected, report this.");
+                }
+                activity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        cookieBar.show();
+                    }
+                });
+
+
+        }};
+
+
+
         holder.add_new_video_btn.setOnClickListener(v -> {
-            // showing snack-bar for undo
-             String title = StringUtils.abbreviate(singleVideo.getTitle(), 40) ;
 
 
-            Snackbar snackbar = Snackbar.make(layout, title + " Added!", Snackbar.LENGTH_LONG);
+            ws = new WebSocket(sp, "ws://192.168.1.14:8000/test");
+            int taskId = Functions.randInt();
+            ws.addListener(responder, taskId);
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject()
+                        .put("worker", "queue")
+                        .put("action", "add")
+                        .put("taskId", taskId)
+                        .put("extras", new JSONObject()
+                                .put("videoId", singleVideo.getId()));
+
+                ws.send(jsonObject);
 
 
-            snackbar.show();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
         });
 
 
@@ -158,7 +175,7 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
             intent.putExtra("VIDEO_TITLE",singleVideo.getTitle());
             intent.putExtra("VIDEO_DESC",singleVideo.getDescription());
 
-            //Flags define hot the activity should behave when launched
+            //Flags define how the activity should behave when launched
             //FLAG_ACTIVITY_NEW_TASK flag if set, the activity will become the start of a new task on this history stack.
             //adding flag as it is required for YoutubePlayerView Activity
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -189,12 +206,12 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
             //the video_item.xml file is now associated as view object
             //so the view can be called from view's object
-            add_new_video_btn = (ImageButton) view.findViewById(R.id.add_new_video_btn);
-            thumbnail = (ImageView) view.findViewById(R.id.video_thumbnail);
-            video_title = (TextView) view.findViewById(R.id.video_title);
-            video_id = (TextView) view.findViewById(R.id.video_id);
-            video_description = (TextView) view.findViewById(R.id.video_description);
-            video_view = (RelativeLayout) view.findViewById(R.id.video_view);
+            add_new_video_btn = view.findViewById(R.id.AP_add_new_video_btn);
+            thumbnail = view.findViewById(R.id.AS_video_thumbnail);
+            video_title = view.findViewById(R.id.video_title);
+            video_id = view.findViewById(R.id.video_id);
+            video_description = view.findViewById(R.id.video_description);
+            video_view = view.findViewById(R.id.video_view);
         }
     }
 

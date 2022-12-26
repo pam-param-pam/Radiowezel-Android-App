@@ -2,13 +2,12 @@ package dev.pamparampam.myapplication.radiowezel.helper;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -22,332 +21,87 @@ import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
-import dev.pamparampam.myapplication.radiowezel.EmailVerify;
-import dev.pamparampam.myapplication.radiowezel.HomeActivity;
-import dev.pamparampam.myapplication.radiowezel.LoginActivity;
+import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.MyApplication;
+import dev.pamparampam.myapplication.radiowezel.SettingsActivity;
 import dev.pamparampam.myapplication.radiowezel.VolleyCallback;
 import dev.pamparampam.myapplication.radiowezel.widget.ProgressBarDialog;
 
 
+
+
 public class Functions extends AppCompatActivity{
 
-    //Main URL
-    private static final String MAIN_URL = "http://178.42.189.210:8000/";
-
+    // Main URL
+    public static final String MAIN_URL = "http://192.168.1.14:8000/";
+    // Auth URL
+    public static final String AUTH_URL = "auth/";
     // Login URL
-    private static final String LOGIN_URL = MAIN_URL + "auth/token/";
-
+    public static final String LOGIN_URL = MAIN_URL + AUTH_URL + "token/";
     // Register URL
-    private static final String REGISTER_URL = MAIN_URL + "auth/register/";
-
+    public static final String REGISTER_URL = MAIN_URL + AUTH_URL + "register/";
     // OTP Verification
-    private static final String OTP_VERIFY_URL = MAIN_URL + "auth/mail/verify/";
+    public static final String OTP_VERIFY_URL = MAIN_URL + AUTH_URL + "mail/verify/";
 
-    private static final String RESEND_VERIFY_MAIL = MAIN_URL + "auth/mail/resend/";
+    public static final String RESEND_VERIFY_MAIL = MAIN_URL + AUTH_URL + "mail/resend/";
 
-    private static final String RESET_START_URL = MAIN_URL + "auth/user/reset/start/";
+    public static final String RESET_START_URL = MAIN_URL + AUTH_URL + "user/reset/start/";
 
-    private static final String RESET_CHECK_URL = MAIN_URL + "auth/user/reset/check/";
+    public static final String RESET_CHECK_URL = MAIN_URL + AUTH_URL + "user/reset/check/";
+
+    public static final String CHANGE_PASSWORD = MAIN_URL + AUTH_URL + "user/change/password/";
+
+    public static final String CHANGE_INFO = MAIN_URL + AUTH_URL + "user/change/info/";
+
+    public static final String CHANGE_EMAIL = MAIN_URL + AUTH_URL + "user/change/email/";
 
     // Forgot Password
-    private static final String RESET_FINISH_URL = MAIN_URL + "auth/user/reset/finish/";
-    public static void isValidVerifyCode(SharedPreferences sp, Context ct, String code) {
-        showProgressDialog(ct, "Verifying...");
-        Map<String, String> params = new HashMap<>();
-
-        params.put("code", code);
-
-        makeRequest(new VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject result) {
-                hideProgressDialog(ct);
-                Intent switchActivityIntent = new Intent(ct, HomeActivity.class);
-
-                switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                ((Activity) ct).finish();
-
-                ct.startActivity(switchActivityIntent);
-
-            }
-
-            @Override
-            public void onError(int code, Map<String, ArrayList<String>> message) {
-
-            }
+    public static final String RESET_FINISH_URL = MAIN_URL + "auth/user/reset/finish/";
 
 
-        }, ct, OTP_VERIFY_URL, params, true, sp);
+
+    public static void refreshSetting() {
+
+        SettingsActivity settingsActivity = SettingsActivity.getInstance();
+        TextView email = settingsActivity.findViewById(R.id.AS_email);
+        TextView username = settingsActivity.findViewById(R.id.AS_username);
+        TextView firstName = settingsActivity.findViewById(R.id.settings_first_name);
+        TextView lastName = settingsActivity.findViewById(R.id.AS_last_name);
+
+        SharedPreferences sp = settingsActivity.getSharedPreferences("login", MODE_PRIVATE);
+        String usernameSp = sp.getString("username", "Username N/A");
+        username.setText(usernameSp);
+        String emailSp = sp.getString("email", "Email N/A");
+        email.setText(emailSp);
+        String firstNameSp = sp.getString("first_name", "First Name N/A");
+        firstName.setText(firstNameSp);
+        String lastNameSp = sp.getString("last_name", "Last Name N/A");
+        System.out.println(lastNameSp);
+
+        lastName.setText(lastNameSp);
+
 
     }
 
-    public static void resetCheck(SharedPreferences sp, Context ct, String email, String code, AlertDialog alertDialog, TextInputLayout mEditEmail) {
-        showProgressDialog(ct, "Checking...");
-        Map<String, String> params = new HashMap<>();
 
-        params.put("email", email);
-        params.put("code", code);
-
-        makeRequest(new VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject result) {
-                LoginActivity.getInstance().enterNewPasswordsDialog(email, code);
-                alertDialog.dismiss();
-
-            }
-
-            @Override
-            public void onError(int code, Map<String, ArrayList<String>> message) {
-                if (message.containsKey("code")) {
-                    mEditEmail.setError(String.join("\n", Objects.requireNonNull(message.get("code"))));
-                }
-                if (message.containsKey("email")) {
-                    mEditEmail.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
-                }
-            }
-
-        }, ct, RESET_CHECK_URL, params, false, sp);
-
-    }
-
-    public static void resetStart(SharedPreferences sp, Context ct, String email, AlertDialog alertDialog, TextInputLayout mEditEmail) {
-        showProgressDialog(ct, "Sending email...");
-        Map<String, String> params = new HashMap<>();
-        params.put("email", email);
-        makeRequest(new VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject result) {
-                LoginActivity.getInstance().enterEmailCodeDialog(email);
-
-                alertDialog.dismiss();
-
-            }
-
-            @Override
-            public void onError(int code, Map<String, ArrayList<String>> message) {
-                if (message.containsKey("email")) {
-                    mEditEmail.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
-                    }
-                }
-
-        }, ct, RESET_START_URL, params, false, sp);
-
-    }
-    public static void resetFinish(SharedPreferences sp, Context ct, String email, String code, String passwordText, AlertDialog alertDialog, TextInputLayout password, TextInputLayout repeatPassword) {
-        showProgressDialog(ct, "Reseting...");
-        Map<String, String> params = new HashMap<>();
-        params.put("email", email);
-        params.put("code", code);
-        params.put("new_password", passwordText);
-        makeRequest(new VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject result) {
-
-                Toast.makeText(ct, "Password reset", Toast.LENGTH_SHORT).show();
-                alertDialog.dismiss();
-
-            }
-
-            @Override
-            public void onError(int code, Map<String, ArrayList<String>> message) {
-                if (message.containsKey("new_password")) {
-                    password.setError(String.join("\n", Objects.requireNonNull(message.get("new_password"))));
-                    repeatPassword.setError(String.join("\n", Objects.requireNonNull(message.get("new_password"))));
-
-                }
-                if (message.containsKey("non_field_errors")) {
-                    password.setError(String.join("\n", Objects.requireNonNull(message.get("non_field_errors"))));
-                    repeatPassword.setError(String.join("\n", Objects.requireNonNull(message.get("non_field_errors"))));
-
-                }
-
-            }
-
-        }, ct, RESET_FINISH_URL, params, false, sp);
-
-    }
-
-    public static void resendEmailVerifyCode(SharedPreferences sp, Context ct) {
-        Map<String, String> params = new HashMap<>();
-
-        makeRequest(new VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject result) {
-                Toast.makeText(ct, "Resend!", Toast.LENGTH_SHORT).show();
-
-            }
-
-            @Override
-            public void onError(int code, Map<String, ArrayList<String>> message) {
-                Toast.makeText(ct, "Error!", Toast.LENGTH_SHORT).show();
-                hideProgressDialog(ct);
-            }
-
-
-        }, ct, RESEND_VERIFY_MAIL, params, true, sp);
-    }
-
-    public static void register(SharedPreferences sp, Context ct, String usernameText, String firstNameText, String lastNameText, String emailText, String passwordText, String repeatPasswordText, TextInputLayout username, TextInputLayout first_name, TextInputLayout last_name, TextInputLayout email, TextInputLayout password, TextInputLayout repeatPassword) {
-        showProgressDialog(ct, "Registering...");
-        Map<String, String> params = new HashMap<>();
-
-        params.put("username", usernameText);
-        params.put("first_name", firstNameText);
-        params.put("last_name", lastNameText);
-        params.put("email", emailText);
-        params.put("password", passwordText);
-        params.put("repeatPassword", repeatPasswordText);
-        makeRequest(new VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject result) {
-
-                String token = result.optString("access");
-                sp.edit().putString("token", token).apply();
-
-                String refresh = result.optString("refresh");
-                sp.edit().putString("refresh", refresh).apply();
-
-                sp.edit().putBoolean("logged", true).apply();
-
-                int lifetime = result.optInt("lifetime");
-                sp.edit().putInt("token_lifetime", lifetime).apply();
-
-                String username = result.optString("username");
-                sp.edit().putString("username", username).apply();
-
-                String email = result.optString("email");
-                sp.edit().putString("email", email).apply();
-
-                String first_name = result.optString("first_name");
-                sp.edit().putString("first_name", first_name).apply();
-
-                String last_name = result.optString("last_name");
-                sp.edit().putString("last_name", last_name).apply();
-
-                hideProgressDialog(ct);
-
-                Intent switchActivityIntent = new Intent(ct, EmailVerify.class);
-
-                switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                ((Activity) ct).finish();
-
-                ct.startActivity(switchActivityIntent);
-            }
-
-            @Override
-            public void onError(int code, Map<String, ArrayList<String>> message) {
-                username.setErrorEnabled(false);
-                first_name.setErrorEnabled(false);
-                last_name.setErrorEnabled(false);
-                email.setErrorEnabled(false);
-                password.setErrorEnabled(false);
-                repeatPassword.setErrorEnabled(false);
-
-                if (message.containsKey("username")) {
-                    username.setError(String.join("\n", Objects.requireNonNull(message.get("username"))));
-                }
-                if (message.containsKey("email")) {
-                    email.setError(String.join("\n", Objects.requireNonNull(message.get("email"))));
-                }
-                if (message.containsKey("first_name")) {
-                    first_name.setError(String.join("\n", Objects.requireNonNull(message.get("first_name"))));
-                }
-                if (message.containsKey("last_name")) {
-                    last_name.setError(String.join("\n", Objects.requireNonNull(message.get("last_name"))));
-                }
-                if (message.containsKey("password")) {
-                    password.setError(String.join("\n", Objects.requireNonNull(message.get("password"))));
-                }
-                if (message.containsKey("repeatPassword")) {
-                    repeatPassword.setError(String.join("\n", Objects.requireNonNull(message.get("repeatPassword"))));
-                }
-
-                hideProgressDialog(ct);
-
-            }
-
-
-        }, ct, REGISTER_URL, params, false, sp);
-
-    }
-
-    public static void login(SharedPreferences sp, Context ct, String email, String passwordText, TextInputLayout inputEmail, TextInputLayout inputPassword) {
-        showProgressDialog(ct, "Logging in ...");
-        Map<String, String> params = new HashMap<>();
-        params.put("username", email);
-        params.put("password", passwordText);
-
-        makeRequest(new VolleyCallback() {
-
-            @Override
-            public void onSuccess(JSONObject result) {
-                String token = result.optString("token");
-
-                sp.edit().putString("token", token).apply();
-
-                sp.edit().putBoolean("logged", true).apply();
-
-                int lifetime = result.optInt("lifetime");
-                sp.edit().putInt("token_lifetime", lifetime).apply();
-
-                String username = result.optString("username");
-                sp.edit().putString("username", username).apply();
-
-                String email = result.optString("email");
-                sp.edit().putString("email", email).apply();
-
-                String first_name = result.optString("first_name");
-                sp.edit().putString("first_name", first_name).apply();
-
-                String last_name = result.optString("last_name");
-                sp.edit().putString("last_name", last_name).apply();
-
-
-                Intent switchActivityIntent = new Intent(ct, HomeActivity.class);
-
-                switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                ((Activity) ct).finish();
-
-                ct.startActivity(switchActivityIntent);
-
-            }
-
-            @Override
-            public void onError(int code, Map<String, ArrayList<String>> message) {
-                if (message.containsKey("username")) {
-                    inputEmail.setError(String.join("\n", Objects.requireNonNull(message.get("username"))));
-                }
-                if (message.containsKey("password")) {
-                    inputPassword.setError(String.join("\n", Objects.requireNonNull(message.get("password"))));
-                }
-            }
-
-        }, ct, LOGIN_URL, params, false, sp);
-    }
-
-    public static void makeRequest(final VolleyCallback callback, Context ct, String URL, Map<String, String> params, boolean isTokenNeeded, SharedPreferences sp) {
+    public static void makeRequest(final VolleyCallback callback, String URL, Map<String, String> params, boolean isTokenNeeded, Context ct, SharedPreferences sp) {
         StringRequest request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                System.out.println(response);
                 hideProgressDialog(ct);
                 try {
                     JSONObject obj = new JSONObject(response);
@@ -362,22 +116,21 @@ public class Functions extends AppCompatActivity{
             public void onErrorResponse(VolleyError error) {
                 hideProgressDialog(ct);
                 int statusCode = 0;
-                Map<String, ArrayList<String>> val = null;
+                Map<String, ArrayList<String>> map = null;
                 if (error.networkResponse != null) {
+
                     byte[] htmlBodyBytes = error.networkResponse.data;
 
                     statusCode = error.networkResponse.statusCode;
-
-                    ObjectMapper om = new ObjectMapper();
-                    TypeReference<Map<String, ArrayList<String>>> tr = new TypeReference<Map<String, ArrayList<String>>>() {
-                    };
                     try {
-                        // TODO fix this cuz it gets broken when dict has len 1 i think
-                        val = om.readValue(htmlBodyBytes, tr);
-                        System.out.println(val);
-                        callback.onError(statusCode, val);
+                        String JSON=new JSONObject(new String(htmlBodyBytes)).toString();
+                        final ObjectMapper mapper = new ObjectMapper()
+                                .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+                        map = mapper.readValue(JSON,new TypeReference<HashMap<String, ArrayList<String>>>(){});
+                        System.out.println("ERROR123 " + map);
+                        callback.onError(statusCode, map);
 
-                    } catch (IOException e) {
+                    } catch (JSONException | JsonProcessingException e) {
                         e.printStackTrace();
                     }
                 }
@@ -387,8 +140,11 @@ public class Functions extends AppCompatActivity{
 
                 }
                 if (statusCode == 429) {
-                    Toast.makeText(ct, "TO MANY REQUESTS", Toast.LENGTH_LONG).show();
 
+
+
+
+                    Toast.makeText(ct, "TO MANY REQUESTS", Toast.LENGTH_LONG).show();
                 }
                 if (error instanceof NetworkError) {
                     Toast.makeText(ct, "NETWORK ERROR", Toast.LENGTH_LONG).show();
@@ -425,6 +181,11 @@ public class Functions extends AppCompatActivity{
         MyApplication.getInstance().addToRequestQueue(request);
 
     }
+
+    public static int randInt() {
+        return ThreadLocalRandom.current().nextInt(1000, 9999);
+    }
+
 
     /**
      * Function to logout user

@@ -40,9 +40,9 @@ public class PlayerActivity extends YouTubeBaseActivity implements YouTubePlayer
         playerView.initialize(YoutubeConnector.KEY, this);
 
         //initialising various descriptive data in the UI and player
-        TextView video_title = (TextView)findViewById(R.id.player_title);
-        TextView video_desc = (TextView)findViewById(R.id.player_description);
-        TextView video_id = (TextView)findViewById(R.id.player_id);
+        TextView video_title = (TextView)findViewById(R.id.AP_player_title);
+        TextView video_desc = (TextView)findViewById(R.id.AP_player_description);
+        TextView video_id = (TextView)findViewById(R.id.AP_player_id);
 
         //setting text of each View form UI
         //setText method used to change the text shown in the view

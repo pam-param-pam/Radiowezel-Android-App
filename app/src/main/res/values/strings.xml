@@ -1,38 +1,58 @@
 <resources>
     <string name="app_name">Radiowęzeł</string>
-    <string name="hint_email">Email</string>
-    <string name="hint_password">Password</string>
+    <string name="AL_email_input_HINT">Email</string>
+    <string name="AL_password_input_HINT">Password</string>
     <string name="hint_name">Fullname</string>
-    <string name="login">Login</string>
-    <string name="register">Register</string>
-    <string name="btn_link_to_register">Register Account</string>
-    <string name="btn_link_to_login">Already have an Account?</string>
+    <string name="AL_login_btn_TEXT">Login</string>
+    <string name="AR_register_btn_TEXT">Register</string>
+    <string name="AL_register_btn_TEXT">Register Account</string>
+    <string name="AR_login_btn_TEXT">Already have an Account?</string>
     <string name="welcome">Welcome</string>
     <string name="logout">logout</string>
     <string name="change_password">Change Password</string>
     <string name="old_password">Old Password</string>
-    <string name="new_password">New Password</string>
+    <string name="as_CE_new_password_input_HINT">New Password</string>
     <string name="play_pause_btn">Play</string>
     <string name="on_text">Stop</string>
     <string name="off_text">Play</string>
     <string name="next_btn">Next</string>
     <string name="failed">"Error Occurred"</string>
     <string name="todo">TODO</string>
-    <string name="search_youtube">Search on YouTube</string>
-    <string name="video_id">Video ID N/A</string>
-    <string name="video_description">Video Description N/A</string>
-    <string name="video_title">Video Title N/A</string>
+    <string name="AY_search_youtube_input_HINT">Search on YouTube</string>
+    <string name="AP_video_id_TEXT">Video ID N/A</string>
+    <string name="AP_video_description_TEXT">Video Description N/A</string>
+    <string name="AP_video_title_TEXT">Video Title N/A</string>
     <string name="search_recyclerView">Search</string>
-    <string name="hint_repeat_password">Repeat password</string>
-    <string name="hint_first_name">First name</string>
-    <string name="hint_last_name">Last name</string>
-    <string name="hint_code">Code</string>
-    <string name="hint_code_not_arrived">Code didn\'t arrive?</string>
-    <string name="hint_username">Username</string>
-    <string name="settings_email">Email N/A</string>
-    <string name="settings_username">Username N/A</string>
-    <string name="settings_first_name">First Name N/A</string>
-    <string name="settings_last_name">Last Name N/A</string>
+    <string name="AR_repeat_password_input_HINT">Repeat password</string>
+    <string name="AR_first_name_input_HINT">First name</string>
+    <string name="AR_last_name_input_HINT">Last name</string>
+    <string name="al_EC_code_input_HINT">Code</string>
+    <string name="al_code_not_arrived_btn_TEXT">Code didn\'t arrive?</string>
+    <string name="AR_username_input_HINT">Username</string>
+    <string name="AS_email_TEXT">Email N/A</string>
+    <string name="AS_username_TEXT">Username N/A</string>
+    <string name="AS_first_name_TEXT">First Name N/A</string>
+    <string name="AS_last_name_TEXT">Last Name N/A</string>
+    <string name="as_CI_edit_info_input_HINT">Change info N/A</string>
+    <string name="enter_old_password">Old Password</string>
+    <string name="AEV_verification_code_HINT">Verification Code</string>
+    <string name="AEV_verify_btn_TEXT">Verify</string>
+    <string name="AEV_resend_code_TEXT">Resend Code</string>
+    <string name="AL_forgot_password_btn_TEXT">Forgot Password</string>
+    <string name="AR_email_input_HINT">Email</string>
+    <string name="AR_password_input_HINT">Password</string>
+    <string name="al_EE_email_input_HINT">Email</string>
+    <string name="al_ENP_new_password_input_HINT">New Password</string>
+    <string name="al_ENP_repeat_new_password_input_HINT">Repeat New password</string>
+    <string name="as_CE_old_password_input_HINT">Old Password</string>
+    <string name="as_CP_old_password_input_HINT">Old Password</string>
+    <string name="as_CP_new_password_input_HINT">New password</string>
+    <string name="ah_mr_music_titles_text">Title</string>
+    <string name="ah_mr_music_desc_text">Description</string>
+    <string name="as_CE_new_email_input_HINT">New Email</string>
+    <string name="as_CE_password_input_HINT">Password</string>
+    <string name="TMR_text">Hey! You there, slow down!</string>
+    <string name="AH_title_text">N/A</string>
 
     <string-array name="music_titles">
         <item>1</item>
@@ -58,6 +78,19 @@
         <item>h</item>
         <item>i</item>
         <item>j</item>
+    </string-array>
+
+    <string-array name="music_ids">
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
+        <item>bJ8Sz8CJY5g</item>
     </string-array>
 
 </resources>

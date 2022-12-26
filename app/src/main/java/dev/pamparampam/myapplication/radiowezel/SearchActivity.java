@@ -4,13 +4,14 @@ package dev.pamparampam.myapplication.radiowezel;
 import static android.widget.Toast.LENGTH_LONG;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,17 +19,21 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
 
 
 public class SearchActivity extends AppCompatActivity {
 
     //EditText for input search keywords
     private EditText searchInput;
-    
+    private WebSocket ws;
     //YoutubeAdapter class that serves as a adapter for filling the 
     //RecyclerView by the CardView (video_item.xml) that is created in layout folder
     private YoutubeAdapter youtubeAdapter;
@@ -56,13 +61,16 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         //calling parent class to recall the app's last state
         super.onCreate(savedInstanceState);
+        Intent i = getIntent();
+
+        ws = (WebSocket)i.getSerializableExtra("WS");
 
         //method to fill the activity that is launched with  the activity_main.xml layout file
         setContentView(R.layout.activity_search);
 
         //initialising the objects with their respective view in activity_main.xml file
-        searchInput = findViewById(R.id.search_input);
-        mRecyclerView = findViewById(R.id.videos_recycler_view);
+        searchInput = findViewById(R.id.AY_search_youtube_input);
+        mRecyclerView = findViewById(R.id.AY_videos_recycler_view);
 
         //setting title and and style for progress dialog so that users can understand
         //what is happening currently
@@ -171,7 +179,9 @@ public class SearchActivity extends AppCompatActivity {
     private void fillYoutubeVideos(){
         ConstraintLayout layout = findViewById(R.id.CLM);
         //object of YoutubeAdapter which will fill the RecyclerView
-        youtubeAdapter = new YoutubeAdapter(layout, getApplicationContext(),searchResults);
+        SharedPreferences sp = getSharedPreferences("login",MODE_PRIVATE);
+
+        youtubeAdapter = new YoutubeAdapter(layout, getApplicationContext(),searchResults, sp, SearchActivity.this);
 
         //setAdapter to RecyclerView
         mRecyclerView.setAdapter(youtubeAdapter);
