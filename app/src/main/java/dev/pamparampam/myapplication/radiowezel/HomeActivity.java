@@ -4,6 +4,7 @@ package dev.pamparampam.myapplication.radiowezel;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -15,16 +16,19 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
@@ -38,7 +42,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.aviran.cookiebar2.CookieBar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,6 +52,8 @@ import java.util.List;
 import java.util.Locale;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
+import dev.pamparampam.myapplication.radiowezel.dialogie.Dialogie;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 import dev.pamparampam.myapplication.radiowezel.helper.Responder;
 import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
@@ -71,7 +76,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
     private AudioRecord audioRecord;
     private AudioTrack audioTrack;
     private WebSocket ws;
-    private TextView title;
+    private TextView title, lengthTxt, positionTxt;
     private int intBufferSize;
     private short[] shortAudioData;
     private int intGain;
@@ -139,15 +144,18 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         searchBtn = findViewById(R.id.AH_search_btn);
         title = findViewById(R.id.AH_title_text);
 
-
+        positionTxt = findViewById(R.id.AH_position_text);
+        lengthTxt = findViewById(R.id.AH_length_text);
+        positionBar.setMax(1000);
         recyclerView = findViewById(R.id.AH_songs_recycler_view);
 
-        System.out.println("BUILDING RECYCLER VIEW AGAIN FROM SCRATCH!");
         init();
         buildRecyclerView();
 
 
-
+        positionTxt.setPaintFlags(0);
+        lengthTxt.setPaintFlags(0);
+        title .setPaintFlags(0);
 
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -171,13 +179,10 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
             ws.send(jsonObject);
 
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        // TODO: 24.10.2022
-        //proper generating of recycler view
         if(list == null){
             RelativeLayout layout = findViewById(R.id.RLM);
 
@@ -185,7 +190,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
             Item item = new Item("https://img.freepik.com/premium-vector/system-software-update-upgrade-concept-loading-process-screen-vector-illustration_175838-2182.jpg?w=2000", "Loading...","ID", "CEO OF SLOW INTERNET", "LENGTH");
             list.add(item);
-            sp = getSharedPreferences("login",MODE_PRIVATE);
+            sp = getSharedPreferences("login", MODE_PRIVATE);
 
             mAdapter = new RecyclerViewAdapter(this, sp, this, layout, list, HomeActivity.this);
             ItemTouchHelper.Callback callback = new ItemMoveCallback(mAdapter);
@@ -199,74 +204,24 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
 
 
-
     }
 
-    @SuppressLint("MissingPermission")
-    public void buttonStart(View view) {
-        isRecording = true;
-        int intRecordSampleRate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
 
-        intBufferSize = AudioRecord.getMinBufferSize(intRecordSampleRate, AudioFormat.CHANNEL_IN_MONO
-                , AudioFormat.ENCODING_PCM_16BIT);
-
-        shortAudioData = new short[intBufferSize];
-
-        if (isMicrophonePresent()) {
-            getMicrophonePermission();
-        }
-
-        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC
-                , intRecordSampleRate
-                , AudioFormat.CHANNEL_IN_STEREO
-                , AudioFormat.ENCODING_PCM_16BIT
-                , intBufferSize);
-
-        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC
-                , intRecordSampleRate
-                , AudioFormat.CHANNEL_IN_STEREO
-                , AudioFormat.ENCODING_PCM_16BIT
-                , intBufferSize
-                , AudioTrack.MODE_STREAM);
-
-        audioTrack.setPlaybackRate(intRecordSampleRate);
-        audioRecord.startRecording();
-        audioTrack.play();
-
-
-
-        while (isRecording){
-            audioRecord.read(shortAudioData, 0, shortAudioData.length);
-
-            for (int i = 0; i< shortAudioData.length; i++){
-                shortAudioData[i] = (short) Math.min (shortAudioData[i] * intGain, Short.MAX_VALUE);
-            }
-            audioTrack.write(shortAudioData, 0, shortAudioData.length);
-        }
-    }
-
-    public void buttonStop(View view){
-
-        isRecording = false;
-
-
-    }
     private void init() {
         sp = getSharedPreferences("login",MODE_PRIVATE);
         System.out.println("innit called");
 
-        ws = new WebSocket(sp, "ws://192.168.1.14:8000/test");
+        ws = new WebSocket(sp, HomeActivity.this, Constants.TEST_URL);
         /* global listener */
         ws.addListener(new Responder() {
             @Override
             public void receive(String message) throws JsonProcessingException, JSONException {
-                System.out.println("AAAAAAAAAAAA");
-                System.out.println(message);
                 try {
                     JSONObject obj = new JSONObject(message);
                     String pos = obj.getString("pos");
+                    String length = obj.getString("length");
+                    String seconds = obj.getString("seconds");
                     String titleText = obj.getString("title");
-
 
                     runOnUiThread(new Runnable() {
 
@@ -277,13 +232,11 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
                                 positionBar.setProgress(Integer.parseInt(pos), true);
                             }
                             title.setText(titleText);
-
+                            positionTxt.setText(seconds);
+                            lengthTxt.setText(length);
 
                         }
                     });
-
-
-
                 }
                 catch(JSONException se) {
                     try {
@@ -302,8 +255,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
                             }
                         });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    } catch (JSONException ignored) {
 
                     }
                 }
@@ -325,17 +277,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
         });
 
-        microphoneBtn.setOnClickListener(v -> {
 
-            CookieBar.build(HomeActivity.this)
-                    .setTitle("TITLE")
-                    .setMessage("MESSAGE")
-                    .setDuration(1000)
-                    .setBackgroundColor(R.color.successShine)
-                    .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
-                    .show();
-
-        });
         Responder responder = new Responder() {
             @Override
             public void receive(String message) throws JsonProcessingException, JSONException {
@@ -354,6 +296,11 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
                     case "warning":
                         cookieBar.setBackgroundColor(R.color.warningShine);
                         cookieBar.setIcon(R.drawable.ic_warning_shine);
+
+                        break;
+                    case "info":
+                        cookieBar.setBackgroundColor(R.color.infoShine);
+                        cookieBar.setIcon(R.drawable.ic_info_shine);
 
                         break;
                     case "error":
@@ -380,7 +327,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
             }
         };
-        /*
+
         positionBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -413,7 +360,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
                 }
             }
         });
-        */
+
 
         playBtn.setOnClickListener(v -> {
             int taskId = Functions.randInt();
@@ -432,21 +379,83 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
             }
 
         });
+        microphoneBtn.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Add with spotify!");
 
+            // Set up the input
+            final EditText input = new EditText(this);
+            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+            builder.setView(input);
+
+            // Set up the buttons
+            builder.setPositiveButton("Add", (dialog, which) -> {
+                if (input.getText() != null) {
+
+                    int taskId = Functions.randInt();
+
+                    JSONObject jsonObject;
+                    try {
+                        jsonObject = new JSONObject()
+                                .put("worker", "queue")
+                                .put("action", "spotify")
+                                .put("taskId", taskId).put("extras", new JSONObject()
+                                        .put("playlist_id", input.getText().toString()));
+                        ws.addListener(responder, taskId);
+                        ws.send(jsonObject);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+
+                    }
+                }
+                else {
+                    CookieBar.build(this)
+
+                            .setMessage("Please fill in all blank!")
+                            .setDuration(5000)
+                            .setIcon(R.drawable.ic_error_shine)
+                            .setBackgroundColor(R.color.errorShine)
+                            .setCookiePosition(CookieBar.TOP)
+                            .show();
+                }
+            });
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+            builder.show();
+
+        });
         pauseBtn.setOnClickListener(v -> {
             int taskId = Functions.randInt();
-
-            JSONObject jsonObject;
-            try {
-                jsonObject = new JSONObject()
-                        .put("worker", "player")
-                        .put("action", "pause")
-                        .put("taskId", taskId);
-                ws.addListener(responder, taskId);
-                ws.send(jsonObject);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            boolean smoothPause = sp.getBoolean("smoothPause", false);
+            if (smoothPause) {
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject()
+                            .put("worker", "player")
+                            .put("action", "smooth_pause")
+                            .put("taskId", taskId);
+                    ws.addListener(responder, taskId);
+                    ws.send(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
+            else {
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject()
+                            .put("worker", "player")
+                            .put("action", "pause")
+                            .put("taskId", taskId);
+                    ws.addListener(responder, taskId);
+                    ws.send(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
 
         });
 

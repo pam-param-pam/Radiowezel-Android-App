@@ -49,13 +49,12 @@ dependencies {
 
     implementation 'com.google.apis:google-api-services-youtube:v3-rev222-1.25.0'
     implementation 'com.google.http-client:google-http-client-jackson2:1.42.2'
-    implementation 'dev.gustavoavila:java-android-websocket-client:2.0.1'
-
     implementation 'com.shamanland:xdroid-toaster:0.0.10'
+    implementation 'com.github.mejdi14:Flat-Dialog-Android:1.0.5'
+    implementation 'com.github.sabujak-sabujak:RoundedButton:v0.1.1'
 
     implementation 'com.github.welcome2c:LottieProgressDialog:1.0.1'
     implementation 'com.github.tfaki:ComposableSweetToast:1.0.1'
-    implementation 'org.aviran.cookiebar2:cookiebar2:1.1.5'
     implementation 'com.github.aliab:circular-music-progressbar:v1.4.0'
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
     //noinspection GradleDependency

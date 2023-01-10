@@ -1,6 +1,5 @@
 package dev.pamparampam.myapplication.radiowezel;
 
-import static dev.pamparampam.myapplication.radiowezel.helper.Functions.OTP_VERIFY_URL;
 import static dev.pamparampam.myapplication.radiowezel.helper.Functions.RESET_CHECK_URL;
 import static dev.pamparampam.myapplication.radiowezel.helper.Functions.makeRequest;
 import static dev.pamparampam.myapplication.radiowezel.helper.Functions.showProgressDialog;
@@ -19,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.aviran.cookiebar2.CookieBar;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -28,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 
 
@@ -196,6 +195,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void enterEmailCodeDialog(String email) {
+
         View dialogView = getLayoutInflater().inflate(R.layout.al_enter_code, null);
         Button codeNotArrived = dialogView.findViewById(R.id.al_code_not_arrived_btn);
         TextInputLayout mEmailCode = dialogView.findViewById(R.id.al_EC_email_code_input);
@@ -415,8 +415,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(JSONObject result) {
                 String token = result.optString("access");
-                sp.edit().putString("token", token).apply();
 
+                sp.edit().putString("token", token).apply();
                 String refresh = result.optString("refresh");
                 sp.edit().putString("refresh", refresh).apply();
 

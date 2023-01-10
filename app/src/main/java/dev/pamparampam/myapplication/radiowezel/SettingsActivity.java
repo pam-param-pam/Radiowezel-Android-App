@@ -5,7 +5,6 @@ import static dev.pamparampam.myapplication.radiowezel.helper.Functions.makeRequ
 import static dev.pamparampam.myapplication.radiowezel.helper.Functions.refreshSetting;
 import static dev.pamparampam.myapplication.radiowezel.helper.Functions.showProgressDialog;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,15 +15,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.transition.Visibility;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.aviran.cookiebar2.CookieBar;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -33,7 +36,11 @@ import java.util.Map;
 import java.util.Objects;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
+import dev.pamparampam.myapplication.radiowezel.dialogie.Dialogie;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.helper.Responder;
+import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
 
 
 public class SettingsActivity extends AppCompatActivity {
@@ -42,26 +49,35 @@ public class SettingsActivity extends AppCompatActivity {
 
     private SharedPreferences sp;
     private static SettingsActivity instance;
-
+    private TextView email, username, firstName, lastName;
+    private SeekBar volumeBar;
+    private Button spotify_btn;
+    private MaterialButton btnChangePassword, btnLogout;
+    private WebSocket ws;
+    private SwitchCompat smoothPauseSwitch;
     public static SettingsActivity getInstance() {
         return instance;
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        instance =  this;
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        sp = getSharedPreferences("login", MODE_PRIVATE);
+        instance = this;
 
+
+        setContentView(R.layout.activity_settings);
+        volumeBar = findViewById(R.id.AS_volume_bar);
+
+        ws = new WebSocket(sp, SettingsActivity.this, Constants.TEST_URL);
 
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         init();
+
     }
 
-
-
-    @Override
+        @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == android.R.id.home) {
@@ -77,18 +93,93 @@ public class SettingsActivity extends AppCompatActivity {
     }
     private void init() {
         refreshSetting();
+        fetchVolume();
+        spotify_btn.setVisibility(View.GONE);
+        volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-        TextView email, username, firstName, lastName;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
 
-        MaterialButton btnChangePassword, btnLogout;
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int taskId = Functions.randInt();
+
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject()
+                            .put("worker", "player")
+                            .put("action", "set_volume").put("extras", new JSONObject()
+                                    .put("volume", seekBar.getProgress()))
+                            .put("taskId", taskId);
+                    ws.addListener(new Responder() {
+                        @Override
+                        public void receive(String message) throws JsonProcessingException, JSONException {
+                            super.receive(message);
+                            JSONObject obj = new JSONObject(message);
+                            CookieBar.Builder cookieBar = CookieBar.build(SettingsActivity.this).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());
+                            switch(obj.get("status").toString()) {
+                                case "success":
+                                    cookieBar.setBackgroundColor(R.color.successShine);
+                                    cookieBar.setIcon(R.drawable.ic_success_shine);
+                                    break;
+                                case "warning":
+                                    cookieBar.setBackgroundColor(R.color.warningShine);
+                                    cookieBar.setIcon(R.drawable.ic_warning_shine);
+
+                                    break;
+                                case "error":
+                                    cookieBar.setBackgroundColor(R.color.errorShine);
+                                    cookieBar.setIcon(R.drawable.ic_error_shine);
+
+                                    break;
+                                default:
+                                    cookieBar.setBackgroundColor(R.color.actionErrorShine);
+                                    cookieBar.setIcon(R.drawable.ic_error_retro);
+
+                                    cookieBar.setMessage("Unexpected, report this.");
+                            }
+
+                            runOnUiThread(new Runnable() {
+
+                                @Override
+                                public void run() {
+
+                                    cookieBar.show();
+
+                                }
+                            });
+                        }
+                    }, taskId);
+
+                    ws.send(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        spotify_btn = findViewById(R.id.AS_spotify_btn);
         email = findViewById(R.id.AS_email);
         username = findViewById(R.id.AS_username);
-        firstName = findViewById(R.id.settings_first_name);
+        firstName = findViewById(R.id.AS_first_name);
         lastName = findViewById(R.id.AS_last_name);
+        btnChangePassword = findViewById(R.id.AS_change_password_btn);
+        btnLogout = findViewById(R.id.AS_logout_btn);
 
-        btnChangePassword = findViewById(R.id.change_password);
-        btnLogout = findViewById(R.id.logout);
+        smoothPauseSwitch = findViewById(R.id.AS_settings_smooth_pause_switch);
+        boolean smoothPause = sp.getBoolean("smoothPause", false);
+        smoothPauseSwitch.setChecked(smoothPause);
 
+        smoothPauseSwitch.setOnClickListener(v -> {
+            sp.edit().putBoolean("smoothPause", smoothPauseSwitch.isChecked()).apply();
+        });
 
         username.setOnClickListener(v -> {
             changeInfoDialog("Username", "username");
@@ -102,6 +193,7 @@ public class SettingsActivity extends AppCompatActivity {
             changeInfoDialog("Last Name", "last_name");
 
         });
+
 
         btnLogout.setOnClickListener(v -> logoutUser());
 
@@ -177,7 +269,7 @@ public class SettingsActivity extends AppCompatActivity {
         View dialogView = inflater.inflate(R.layout.as_change_email, null);
 
         dialogBuilder.setView(dialogView);
-        dialogBuilder.setTitle("Change Password");
+        dialogBuilder.setTitle("Change Email");
         dialogBuilder.setCancelable(false);
 
         final TextInputLayout password = dialogView.findViewById(R.id.as_CE_password_input);
@@ -248,8 +340,43 @@ public class SettingsActivity extends AppCompatActivity {
 }
 
 
+
+    private void fetchVolume() {
+        int taskId = Functions.randInt();
+
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject()
+                    .put("worker", "player")
+                    .put("action", "get_volume").put("extras", new JSONObject())
+                    .put("taskId", taskId);
+            ws.addListener(new Responder() {
+                @Override
+                public void receive(String message) throws JsonProcessingException, JSONException {
+                    super.receive(message);
+                    JSONObject obj = new JSONObject(message);
+                    int volume = obj.getInt("volume");
+
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            volumeBar.setProgress(volume);
+
+                        }
+                    });
+                }
+            }, taskId);
+
+            ws.send(jsonObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private void changeInfoDialog(String text, String type) {
-        sp = getSharedPreferences("login", MODE_PRIVATE);
 
         View dialogView = getLayoutInflater().inflate(R.layout.as_change_info, null);
 
@@ -342,16 +469,10 @@ public class SettingsActivity extends AppCompatActivity {
 
     }
     private void logoutUser() {
+
         sp = getSharedPreferences("login", MODE_PRIVATE);
+        Functions.logoutUser(sp, SettingsActivity.this);
 
-        sp.edit().clear().apply();
-        Intent switchActivityIntent = new Intent(this, LoginActivity.class);
-        switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        finish();
-
-
-        startActivity(switchActivityIntent);
 
     }
 

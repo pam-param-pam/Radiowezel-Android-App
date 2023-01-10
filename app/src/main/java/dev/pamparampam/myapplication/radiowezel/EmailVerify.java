@@ -19,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.aviran.cookiebar2.CookieBar;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 
 

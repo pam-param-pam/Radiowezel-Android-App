@@ -18,6 +18,7 @@
     <string name="next_btn">Next</string>
     <string name="failed">"Error Occurred"</string>
     <string name="todo">TODO</string>
+    <string name="action">ACTION</string>
     <string name="AY_search_youtube_input_HINT">Search on YouTube</string>
     <string name="AP_video_id_TEXT">Video ID N/A</string>
     <string name="AP_video_description_TEXT">Video Description N/A</string>
@@ -53,6 +54,9 @@
     <string name="as_CE_password_input_HINT">Password</string>
     <string name="TMR_text">Hey! You there, slow down!</string>
     <string name="AH_title_text">N/A</string>
+    <string name="Spotify_add">Add with spotify!</string>
+    <string name="volume">Volume</string>
+    <string name="smooth_pause">Smooth pause</string>
 
     <string-array name="music_titles">
         <item>1</item>

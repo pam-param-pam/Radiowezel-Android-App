@@ -25,7 +25,7 @@
         <!-- Size and various properties can be set with the view -->
         <!-- Here image or the thumbnail of the video will be shown -->
         <ImageView
-            android:id="@+id/AS_video_thumbnail"
+            android:id="@+id/AS_profile_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:src="@mipmap/ic_launcher"
@@ -44,7 +44,7 @@
             android:textSize="18sp"
             android:textStyle="normal|bold"
             android:maxLines="2"
-            android:layout_below="@+id/AS_video_thumbnail" />
+            android:layout_below="@+id/AS_profile_thumbnail" />
 
         <!-- TextView used to show id of the searched video -->
 

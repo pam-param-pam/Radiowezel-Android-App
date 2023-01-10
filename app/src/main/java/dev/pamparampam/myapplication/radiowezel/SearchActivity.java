@@ -19,12 +19,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.List;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
 
@@ -37,11 +35,11 @@ public class SearchActivity extends AppCompatActivity {
     //YoutubeAdapter class that serves as a adapter for filling the 
     //RecyclerView by the CardView (video_item.xml) that is created in layout folder
     private YoutubeAdapter youtubeAdapter;
-    
+
     //RecyclerView manages a long list by recycling the portion of view
     //that is currently visible on screen
     private RecyclerView mRecyclerView;
-    
+
     //ProgressDialog can be shown while downloading data from the internet
     //which indicates that the query is being processed
 
@@ -63,7 +61,7 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Intent i = getIntent();
 
-        ws = (WebSocket)i.getSerializableExtra("WS");
+        ws = (WebSocket) i.getSerializableExtra("WS");
 
         //method to fill the activity that is launched with  the activity_main.xml layout file
         setContentView(R.layout.activity_search);
@@ -94,11 +92,10 @@ public class SearchActivity extends AppCompatActivity {
 
             //actionId of the respective action is returned as integer which can
             //be checked with our set custom search button in keyboard
-            if(actionId == EditorInfo.IME_ACTION_SEARCH){
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
 
                 //setting progress message so that users can understand what is happening
-                showDialog("Finding videos for "+v.getText().toString());
-
+                showDialog("Finding videos for " + v.getText().toString());
 
 
                 //calling our search method created below with input keyword entered by user
@@ -106,7 +103,7 @@ public class SearchActivity extends AppCompatActivity {
                 searchOnYoutube(v.getText().toString());
 
                 //getting instance of the keyboard or any other input from which user types
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 //hiding the keyboard once search button is clicked
                 imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                         InputMethodManager.RESULT_UNCHANGED_SHOWN);
@@ -119,43 +116,69 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     //custom search method which takes argument as the keyword for which videos is to be searched
-    private void searchOnYoutube(final String keywords){
-        
+    private void searchOnYoutube(final String keywords) {
+
         //A thread that will execute the searching and inflating the RecyclerView as and when
         //results are found
-        new Thread(){
+        new Thread() {
 
             //implementing run method
-            public void run(){
+            public void run() {
 
                 //create our YoutubeConnector class's object with Activity context as argument
                 YoutubeConnector yc = new YoutubeConnector(SearchActivity.this);
-                
+
                 //calling the YoutubeConnector's search method by entered keyword 
                 //and saving the results in list of type VideoItem class
                 searchResults = yc.search(keywords);
 
+                if (searchResults == null) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            CookieBar.build(SearchActivity.this)
+                                    .setTitle("NETWORK ERROR")
+                                    .setMessage("Looks like you don't have internet")
+                                    .setDuration(5000)
+                                    .setBackgroundColor(R.color.errorShine)
+                                    .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                                    .show();
+                            hideDialog();
+                        }
+                    });
 
-                //handler's method used for doing changes in the UI
-                //implementing run method of Runnable
-                handler.post(() -> {
-                    if (searchResults.isEmpty()) {
-                        makeToast("Couldn't find anything...");
+                } else {
 
-                    }
 
-                    //call method to create Adapter for RecyclerView and filling the list
-                    //with thumbnail, title, id and description
-                    fillYoutubeVideos();
+                    //handler's method used for doing changes in the UI
+                    //implementing run method of Runnable
+                    handler.post(() -> {
+                        if (searchResults.isEmpty()) {
 
-                    //after the above has been done hiding the ProgressDialog
-                    hideDialog();
-                });
+                            CookieBar.build(SearchActivity.this)
+
+                                    .setMessage("Couldn't find anything sorry")
+                                    .setDuration(5000)
+                                    .setIcon(R.drawable.ic_error_shine)
+                                    .setBackgroundColor(R.color.errorShine)
+                                    .setCookiePosition(CookieBar.TOP)
+                                    .show();
+
+
+                        }
+
+                        //call method to create Adapter for RecyclerView and filling the list
+                        //with thumbnail, title, id and description
+                        fillYoutubeVideos();
+
+                        //after the above has been done hiding the ProgressDialog
+                        hideDialog();
+                    });
+                }
             }
-
-        //starting the thread
+            //starting the thread
         }.start();
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -165,23 +188,25 @@ public class SearchActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
+
     private void makeToast(String text) {
         Toast.makeText(this, text, LENGTH_LONG).show();
 
     }
 
     //method for creating adapter and setting it to recycler view
-    private void fillYoutubeVideos(){
+    private void fillYoutubeVideos() {
         ConstraintLayout layout = findViewById(R.id.CLM);
         //object of YoutubeAdapter which will fill the RecyclerView
-        SharedPreferences sp = getSharedPreferences("login",MODE_PRIVATE);
+        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
 
-        youtubeAdapter = new YoutubeAdapter(layout, getApplicationContext(),searchResults, sp, SearchActivity.this);
+        youtubeAdapter = new YoutubeAdapter(layout, getApplicationContext(), searchResults, sp, SearchActivity.this);
 
         //setAdapter to RecyclerView
         mRecyclerView.setAdapter(youtubeAdapter);

@@ -22,8 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
-import org.aviran.cookiebar2.CookieBar;
-import org.aviran.cookiebar2.OnActionClickListener;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +31,8 @@ import java.util.Collections;
 import java.util.List;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.OnActionClickListener;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 import dev.pamparampam.myapplication.radiowezel.helper.Responder;
 import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
@@ -112,7 +113,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         // showing snack-bar for undo
 
 
-        ws = new WebSocket(sp, "ws://192.168.1.14:8000/test");
+        ws = new WebSocket(sp, activity,Constants.TEST_URL);
 
 
         int taskId = Functions.randInt();
@@ -196,7 +197,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public void restoreItem(Item item, int position) {
-        ws = new WebSocket(sp, "ws://192.168.1.14:8000/test");
+        ws = new WebSocket(sp,activity, Constants.TEST_URL);
         int taskId = Functions.randInt();
         JSONObject jsonObject;
         try {
@@ -272,7 +273,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
         notifyItemMoved(fromPosition, toPosition);
 
-        ws = new WebSocket(sp, "ws://192.168.1.14:8000/test");
+        ws = new WebSocket(sp, activity,Constants.TEST_URL);
 
         int taskId = Functions.randInt();
         JSONObject jsonObject;

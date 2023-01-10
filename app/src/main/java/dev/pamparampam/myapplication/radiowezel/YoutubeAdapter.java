@@ -1,21 +1,12 @@
 package dev.pamparampam.myapplication.radiowezel;
 
-//import static greco.lorenzo.com.lgsnackbar.style.LGSnackBarTheme.SnackbarStyle.SUCCESS;
-//import static greco.lorenzo.com.lgsnackbar.style.LGSnackBarTheme.SnackbarStyle.WARNING;
-import static com.google.android.material.internal.ContextUtils.getActivity;
-import static xdroid.toaster.Toaster.toast;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
-
-
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -28,18 +19,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.squareup.picasso.Picasso;
 
-import org.apache.commons.lang3.StringUtils;
-import org.aviran.cookiebar2.CookieBar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 import dev.pamparampam.myapplication.radiowezel.helper.Responder;
 import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
-//import greco.lorenzo.com.lgsnackbar.LGSnackbarManager;
 
 
 //Adapter class for RecyclerView of videos
@@ -136,7 +125,7 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         holder.add_new_video_btn.setOnClickListener(v -> {
 
 
-            ws = new WebSocket(sp, "ws://192.168.1.14:8000/test");
+            ws = new WebSocket(sp, activity,Constants.TEST_URL);
             int taskId = Functions.randInt();
             ws.addListener(responder, taskId);
             JSONObject jsonObject;
@@ -207,7 +196,7 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
             //the video_item.xml file is now associated as view object
             //so the view can be called from view's object
             add_new_video_btn = view.findViewById(R.id.AP_add_new_video_btn);
-            thumbnail = view.findViewById(R.id.AS_video_thumbnail);
+            thumbnail = view.findViewById(R.id.AS_profile_thumbnail);
             video_title = view.findViewById(R.id.video_title);
             video_id = view.findViewById(R.id.video_id);
             video_description = view.findViewById(R.id.video_description);

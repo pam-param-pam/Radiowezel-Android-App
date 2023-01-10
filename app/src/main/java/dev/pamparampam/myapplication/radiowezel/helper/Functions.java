@@ -2,7 +2,9 @@ package dev.pamparampam.myapplication.radiowezel.helper;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
@@ -13,7 +15,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkError;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
@@ -35,9 +36,11 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.LoginActivity;
 import dev.pamparampam.myapplication.radiowezel.MyApplication;
 import dev.pamparampam.myapplication.radiowezel.SettingsActivity;
 import dev.pamparampam.myapplication.radiowezel.VolleyCallback;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
 import dev.pamparampam.myapplication.radiowezel.widget.ProgressBarDialog;
 
 
@@ -46,7 +49,7 @@ import dev.pamparampam.myapplication.radiowezel.widget.ProgressBarDialog;
 public class Functions extends AppCompatActivity{
 
     // Main URL
-    public static final String MAIN_URL = "http://192.168.1.14:8000/";
+    public static final String MAIN_URL = "https://pamparampam.dev/";
     // Auth URL
     public static final String AUTH_URL = "auth/";
     // Login URL
@@ -71,6 +74,7 @@ public class Functions extends AppCompatActivity{
     // Forgot Password
     public static final String RESET_FINISH_URL = MAIN_URL + "auth/user/reset/finish/";
 
+    private static Handler handler = new Handler();
 
 
     public static void refreshSetting() {
@@ -78,7 +82,7 @@ public class Functions extends AppCompatActivity{
         SettingsActivity settingsActivity = SettingsActivity.getInstance();
         TextView email = settingsActivity.findViewById(R.id.AS_email);
         TextView username = settingsActivity.findViewById(R.id.AS_username);
-        TextView firstName = settingsActivity.findViewById(R.id.settings_first_name);
+        TextView firstName = settingsActivity.findViewById(R.id.AS_first_name);
         TextView lastName = settingsActivity.findViewById(R.id.AS_last_name);
 
         SharedPreferences sp = settingsActivity.getSharedPreferences("login", MODE_PRIVATE);
@@ -89,7 +93,6 @@ public class Functions extends AppCompatActivity{
         String firstNameSp = sp.getString("first_name", "First Name N/A");
         firstName.setText(firstNameSp);
         String lastNameSp = sp.getString("last_name", "Last Name N/A");
-        System.out.println(lastNameSp);
 
         lastName.setText(lastNameSp);
 
@@ -101,7 +104,7 @@ public class Functions extends AppCompatActivity{
         StringRequest request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                System.out.println(response);
+
                 hideProgressDialog(ct);
                 try {
                     JSONObject obj = new JSONObject(response);
@@ -127,35 +130,65 @@ public class Functions extends AppCompatActivity{
                         final ObjectMapper mapper = new ObjectMapper()
                                 .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
                         map = mapper.readValue(JSON,new TypeReference<HashMap<String, ArrayList<String>>>(){});
-                        System.out.println("ERROR123 " + map);
                         callback.onError(statusCode, map);
 
                     } catch (JSONException | JsonProcessingException e) {
                         e.printStackTrace();
                     }
                 }
+                Activity activity = (Activity) ct;
+                if (statusCode == 401) {
+                    CookieBar.build(activity)
+                            .setMessage("Session expired. Please login again.")
+                            .setDuration(3000)
+                            .setBackgroundColor(R.color.infoShine)
+                            .setCookiePosition(CookieBar.TOP)
+                            .show();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            logoutUser(sp, activity);
+                        }
+                    }, 5000);
 
+                }
                 if (statusCode == 500) {
-                    Toast.makeText(ct, "WHOOPSIE POOPSIE UWU WE MADE A FUCKY WUCKY THE CODE MONKEYS AT OUR HEADQUARTERS ARE WORKING VEVY HARD TO FIX THIS >-<", Toast.LENGTH_LONG).show();
+                    CookieBar.build(activity)
+                            .setMessage("WHOOPSIE POOPSIE UWU WE MADE A FUCKY WUCKY THE CODE MONKEYS AT OUR HEADQUARTERS ARE WORKING VEVY HARD TO FIX THIS >-<")
+                            .setDuration(1000)
+                            .setBackgroundColor(R.color.actionErrorShine)
+                            .setCookiePosition(CookieBar.TOP)
+                            .show();
 
                 }
                 if (statusCode == 429) {
 
-
-
-
-                    Toast.makeText(ct, "TO MANY REQUESTS", Toast.LENGTH_LONG).show();
+                    CookieBar.build(activity)
+                            .setTitle("TO MANY REQUESTS")
+                            .setMessage("Please slow down!")
+                            .setDuration(5000)
+                            .setBackgroundColor(R.color.errorShine)
+                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .show();
                 }
                 if (error instanceof NetworkError) {
-                    Toast.makeText(ct, "NETWORK ERROR", Toast.LENGTH_LONG).show();
-                } else if (error instanceof AuthFailureError) {
-                    Toast.makeText(ct, "UNAUTHORIZED!", Toast.LENGTH_LONG).show();
-
-                } else if (error instanceof ParseError) {
+                    CookieBar.build(activity)
+                            .setTitle("NETWORK ERROR")
+                            .setMessage("Looks like you don't have internet")
+                            .setDuration(5000)
+                            .setBackgroundColor(R.color.errorShine)
+                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .show();                }
+                else if (error instanceof ParseError) {
                     Toast.makeText(ct, "Parse Error " + statusCode, Toast.LENGTH_LONG).show();
 
                 } else if (error instanceof TimeoutError) {
-                    Toast.makeText(ct, "Server doesn't respond... ", Toast.LENGTH_LONG).show();
+                    CookieBar.build(activity)
+                            .setTitle("Server doesn't respond... ")
+                            .setDuration(5000)
+                            .setBackgroundColor(R.color.actionErrorShine)
+                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .show();
 
                 }
             }
@@ -186,13 +219,21 @@ public class Functions extends AppCompatActivity{
         return ThreadLocalRandom.current().nextInt(1000, 9999);
     }
 
+    public static void logoutUser(SharedPreferences sp, Activity activity) {
+        WebSocket.getInstance().close();
+        sp.edit().clear().apply();
+        Intent switchActivityIntent = new Intent(activity, LoginActivity.class);
+        switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-    /**
-     * Function to logout user
-     * Resets the temporary data stored in SQLite Database
-     */
-    public void logoutUser(Context context) {
+        activity.finish();
+
+
+        activity.startActivity(switchActivityIntent);
+
+
+
     }
+
     /**
      * Email Address Validation
      */
