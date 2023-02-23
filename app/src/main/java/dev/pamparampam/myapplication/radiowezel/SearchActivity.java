@@ -1,10 +1,7 @@
 package dev.pamparampam.myapplication.radiowezel;
 
 
-import static android.widget.Toast.LENGTH_LONG;
-
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,7 +9,6 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -138,17 +134,15 @@ public class SearchActivity extends AppCompatActivity {
                 searchResults = yc.search(keywords);
 
                 if (searchResults == null) {
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            CookieBar.build(SearchActivity.this)
-                                    .setTitle("NETWORK ERROR")
-                                    .setMessage("Looks like you don't have internet")
-                                    .setDuration(5000)
-                                    .setBackgroundColor(R.color.errorShine)
-                                    .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
-                                    .show();
-                            hideDialog();
-                        }
+                    runOnUiThread(() -> {
+                        CookieBar.build(SearchActivity.this)
+                                .setTitle("NETWORK ERROR")
+                                .setMessage("Looks like you don't have internet")
+                                .setDuration(5000)
+                                .setBackgroundColor(R.color.errorShine)
+                                .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                                .show();
+                        hideDialog();
                     });
 
                 } else {
@@ -200,10 +194,7 @@ public class SearchActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
 
-    private void makeToast(String text) {
-        Toast.makeText(this, text, LENGTH_LONG).show();
 
-    }
 
     //method for creating adapter and setting it to recycler view
     private void fillYoutubeVideos() {

@@ -1,5 +1,5 @@
 package dev.pamparampam.myapplication.radiowezel;
 
 public interface Constants {
-     String TEST_URL = "wss://pamparampam.dev/test";
+     String PLAYER_URL = "wss://pamparampam.dev/test";
 }

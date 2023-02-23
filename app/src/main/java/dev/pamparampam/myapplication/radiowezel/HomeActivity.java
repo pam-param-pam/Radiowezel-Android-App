@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Locale;
 
 import dev.pamparampam.myapplication.R;
-import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 import dev.pamparampam.myapplication.radiowezel.helper.Responder;
 import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
 
@@ -185,7 +184,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
     private void connect() {
         sp = getSharedPreferences("login",MODE_PRIVATE);
 
-        ws = new WebSocket(sp, HomeActivity.this, Constants.TEST_URL);
+        ws = new WebSocket(sp, HomeActivity.this, Constants.PLAYER_URL);
         /* global listener */
         ws.addListener(new Responder() {
             @Override
@@ -224,14 +223,6 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
             }
         }, 100_000);
 
-    }
-
-    private void showDialog(String dialog) {
-        Functions.showProgressDialog(HomeActivity.this, dialog);
-    }
-
-    private void hideDialog() {
-        Functions.hideProgressDialog(HomeActivity.this);
     }
 
 

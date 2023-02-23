@@ -1,12 +1,9 @@
 package dev.pamparampam.myapplication.radiowezel;
 
-import static dev.pamparampam.myapplication.radiowezel.helper.Functions.hideProgressDialog;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,18 +13,17 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.imaginativeworld.oopsnointernet.dialogs.pendulum.NoInternetDialogPendulum;
 import org.json.JSONObject;
 
-import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.helper.Functions;
-import dev.pamparampam.myapplication.R;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import dev.pamparampam.myapplication.R;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
+import dev.pamparampam.myapplication.radiowezel.helper.Functions;
+
 
 public class RegisterActivity extends AppCompatActivity {
-    private static final String TAG = RegisterActivity.class.getSimpleName();
 
     private MaterialButton btnRegister, btnLinkToLogin;
     private TextInputLayout inputUsername;
@@ -76,7 +72,6 @@ public class RegisterActivity extends AppCompatActivity {
             String repeatPassword = Objects.requireNonNull(inputRepeatPassword.getEditText()).getText().toString().trim();
 
             // Check for empty data in the form
-            registerUser("asaSA" + Functions.randInt(), "ssssb", "sadsa", "jedrzej.m"+Functions.randInt()+"@gmail.com", "jedrek06", "jedrek06");
 
             if (!username.isEmpty() && !firstName.isEmpty() && !lastName.isEmpty() && !repeatPassword.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
                 if (Functions.isValidEmailAddress(email)) {

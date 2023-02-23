@@ -214,12 +214,9 @@ final class Cookie extends LinearLayout implements View.OnTouchListener {
 
 //        Log.i("Cookiebar", "Dismiss delay activated for " + cookieId);
         if (isAutoDismissEnabled) {
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    timeOutDismiss = true;
-                    dismiss();
-                }
+            handler.postDelayed(() -> {
+                timeOutDismiss = true;
+                dismiss();
             }, duration);
         }
     }
@@ -331,14 +328,11 @@ final class Cookie extends LinearLayout implements View.OnTouchListener {
     }
 
     private void removeFromParent() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ViewParent parent = getParent();
-                if (parent != null) {
-                    Cookie.this.clearAnimation();
-                    ((ViewGroup) parent).removeView(Cookie.this);
-                }
+        handler.postDelayed(() -> {
+            ViewParent parent = getParent();
+            if (parent != null) {
+                Cookie.this.clearAnimation();
+                ((ViewGroup) parent).removeView(Cookie.this);
             }
         }, 200);
     }

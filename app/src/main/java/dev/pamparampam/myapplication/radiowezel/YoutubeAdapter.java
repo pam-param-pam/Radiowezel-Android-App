@@ -82,7 +82,7 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
         Responder responder = new Responder() {
             @Override
-            public void receive(String message) throws JsonProcessingException, JSONException {
+            public void receive(String message) throws JSONException {
 
                 JSONObject obj = new JSONObject(message);
                 CookieBar.Builder cookieBar = CookieBar.build(activity).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());
@@ -113,7 +113,7 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         holder.add_new_video_btn.setOnClickListener(v -> {
 
 
-            ws = new WebSocket(sp, activity,Constants.TEST_URL);
+            ws = new WebSocket(sp, activity,Constants.PLAYER_URL);
             int taskId = Functions.randInt();
             ws.addListener(responder, taskId);
             JSONObject jsonObject;

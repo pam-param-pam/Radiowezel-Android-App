@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.squareup.picasso.Picasso;
 
 
@@ -98,7 +97,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyView
         // backup of removed item for undo
         final Item deletedItem = mList.get(position);
 
-        ws = new WebSocket(sp, activity,Constants.TEST_URL);
+        ws = new WebSocket(sp, activity,Constants.PLAYER_URL);
 
         int taskId = Functions.randInt();
 
@@ -166,7 +165,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyView
     }
 
     public void restoreItem(Item item, int position) {
-        ws = new WebSocket(sp,activity, Constants.TEST_URL);
+        ws = new WebSocket(sp,activity, Constants.PLAYER_URL);
         int taskId = Functions.randInt();
         JSONObject jsonObject;
         try {
@@ -238,7 +237,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyView
         }
         notifyItemMoved(fromPosition, toPosition);
 
-        ws = new WebSocket(sp, activity,Constants.TEST_URL);
+        ws = new WebSocket(sp, activity,Constants.PLAYER_URL);
 
         int taskId = Functions.randInt();
         JSONObject jsonObject;
@@ -250,7 +249,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyView
                     .put("extras", new JSONObject().put("starting_i", fromPosition).put("ending_i", toPosition));
             Responder responder = new Responder() {
                 @Override
-                public void receive(String message) throws JsonProcessingException, JSONException {
+                public void receive(String message) throws JSONException {
                     JSONObject obj = new JSONObject(message);
                     CookieBar.Builder cookieBar = CookieBar.build(activity).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());
                     switch (obj.get("status").toString()) {

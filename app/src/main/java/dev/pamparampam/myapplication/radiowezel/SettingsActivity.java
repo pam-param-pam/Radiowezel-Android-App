@@ -1,6 +1,5 @@
 package dev.pamparampam.myapplication.radiowezel;
 
-import static dev.pamparampam.myapplication.radiowezel.helper.Functions.hideProgressDialog;
 import static dev.pamparampam.myapplication.radiowezel.helper.Functions.makeRequest;
 import static dev.pamparampam.myapplication.radiowezel.helper.Functions.showProgressDialog;
 
@@ -20,7 +19,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.transition.Visibility;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.android.material.button.MaterialButton;
@@ -37,7 +35,6 @@ import java.util.Objects;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.dialogie.Dialogie;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 import dev.pamparampam.myapplication.radiowezel.helper.Responder;
 import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
@@ -82,7 +79,7 @@ public class SettingsActivity extends AppCompatActivity {
         );
         builder.build();
 
-        ws = new WebSocket(sp, SettingsActivity.this, Constants.TEST_URL);
+        ws = new WebSocket(sp, SettingsActivity.this, Constants.PLAYER_URL);
 
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -179,9 +176,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         });
-        smoothPauseSwitch.setOnClickListener(v -> {
-            sp.edit().putBoolean("smoothPause", smoothPauseSwitch.isChecked()).apply();
-        });
+        smoothPauseSwitch.setOnClickListener(v -> sp.edit().putBoolean("smoothPause", smoothPauseSwitch.isChecked()).apply());
 
         if (!sp.getBoolean("is_email_verified", false)) {
             emailVerify.setVisibility(View.VISIBLE);
@@ -212,18 +207,9 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        username.setOnClickListener(v -> {
-            changeInfoDialog("Username", "username");
-
-        });
-        firstName.setOnClickListener(v -> {
-            changeInfoDialog("First Name", "first_name");
-
-        });
-        lastName.setOnClickListener(v -> {
-            changeInfoDialog("Last Name", "last_name");
-
-        });
+        username.setOnClickListener(v -> changeInfoDialog("Username", "username"));
+        firstName.setOnClickListener(v -> changeInfoDialog("First Name", "first_name"));
+        lastName.setOnClickListener(v -> changeInfoDialog("Last Name", "last_name"));
 
 
         btnLogout.setOnClickListener(v -> logoutUser());
