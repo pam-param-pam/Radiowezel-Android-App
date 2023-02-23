@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -11,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -38,6 +41,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.LoginActivity;
 import dev.pamparampam.myapplication.radiowezel.MyApplication;
+import dev.pamparampam.myapplication.radiowezel.RegisterActivity;
 import dev.pamparampam.myapplication.radiowezel.SettingsActivity;
 import dev.pamparampam.myapplication.radiowezel.VolleyCallback;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
@@ -72,35 +76,31 @@ public class Functions extends AppCompatActivity{
     public static final String CHANGE_EMAIL = MAIN_URL + AUTH_URL + "user/change/email/";
 
     // Forgot Password
-    public static final String RESET_FINISH_URL = MAIN_URL + "auth/user/reset/finish/";
+    public static final String RESET_FINISH_URL = MAIN_URL + AUTH_URL + "user/reset/finish/";
 
     private static Handler handler = new Handler();
 
 
-    public static void refreshSetting() {
 
-        SettingsActivity settingsActivity = SettingsActivity.getInstance();
-        TextView email = settingsActivity.findViewById(R.id.AS_email);
-        TextView username = settingsActivity.findViewById(R.id.AS_username);
-        TextView firstName = settingsActivity.findViewById(R.id.AS_first_name);
-        TextView lastName = settingsActivity.findViewById(R.id.AS_last_name);
-
-        SharedPreferences sp = settingsActivity.getSharedPreferences("login", MODE_PRIVATE);
-        String usernameSp = sp.getString("username", "Username N/A");
-        username.setText(usernameSp);
-        String emailSp = sp.getString("email", "Email N/A");
-        email.setText(emailSp);
-        String firstNameSp = sp.getString("first_name", "First Name N/A");
-        firstName.setText(firstNameSp);
-        String lastNameSp = sp.getString("last_name", "Last Name N/A");
-
-        lastName.setText(lastNameSp);
-
-
-    }
 
 
     public static void makeRequest(final VolleyCallback callback, String URL, Map<String, String> params, boolean isTokenNeeded, Context ct, SharedPreferences sp) {
+        if (!isInternetConnected(ct)) {
+            Activity activity = (Activity) ct;
+            activity.runOnUiThread(new Runnable() {
+                public void run() {
+
+                        CookieBar.build(activity)
+                                .setMessage("No internet...")
+                                .setDuration(3000)
+                                .setIcon(R.drawable.ic_error_shine)
+                                .setBackgroundColor(R.color.actionErrorShine)
+                                .setCookiePosition(CookieBar.TOP)
+                                .show();
+
+                }
+            });
+        }
         StringRequest request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -119,7 +119,7 @@ public class Functions extends AppCompatActivity{
             public void onErrorResponse(VolleyError error) {
                 hideProgressDialog(ct);
                 int statusCode = 0;
-                Map<String, ArrayList<String>> map = null;
+                Map<String, ArrayList<String>> map;
                 if (error.networkResponse != null) {
 
                     byte[] htmlBodyBytes = error.networkResponse.data;
@@ -138,18 +138,15 @@ public class Functions extends AppCompatActivity{
                 }
                 Activity activity = (Activity) ct;
                 if (statusCode == 401) {
-                    CookieBar.build(activity)
-                            .setMessage("Session expired. Please login again.")
-                            .setDuration(3000)
-                            .setBackgroundColor(R.color.infoShine)
-                            .setCookiePosition(CookieBar.TOP)
-                            .show();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            logoutUser(sp, activity);
-                        }
-                    }, 5000);
+                    if (!(activity instanceof LoginActivity) && !(activity instanceof RegisterActivity)) {
+                        CookieBar.build(activity)
+                                .setMessage("Session expired. Please login again.")
+                                .setDuration(3000)
+                                .setBackgroundColor(R.color.infoShine)
+                                .setCookiePosition(CookieBar.TOP)
+                                .show();
+                        handler.postDelayed(() -> logoutUser(sp, activity), 5000);
+                    }
 
                 }
                 if (statusCode == 500) {
@@ -220,7 +217,10 @@ public class Functions extends AppCompatActivity{
     }
 
     public static void logoutUser(SharedPreferences sp, Activity activity) {
-        WebSocket.getInstance().close();
+        if (WebSocket.getInstance() != null) {
+            WebSocket.getInstance().close();
+        }
+
         sp.edit().clear().apply();
         Intent switchActivityIntent = new Intent(activity, LoginActivity.class);
         switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -231,6 +231,13 @@ public class Functions extends AppCompatActivity{
         activity.startActivity(switchActivityIntent);
 
 
+
+    }
+    public static boolean isInternetConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;
 
     }
 

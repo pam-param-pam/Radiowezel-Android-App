@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -31,7 +32,6 @@ public class WebSocket{
     private static WebSocket webSocket;
 
     private static WebSocketClient webSocketClient;
-    //private static List<EventListener> listeners = new ArrayList<>();
     private static Map<Integer, EventListener> listeners = new HashMap<>();
     private static Map<Integer, ScheduledFuture<?>> shedulers = new HashMap<>();
 
@@ -53,34 +53,37 @@ public class WebSocket{
         shedulers.put(taskId, countdown);
         listeners.put(taskId, toAdd);
     }
+    public void fetchQueue() {
+        JSONObject jsonObject;
+        try {
+            jsonObject = new JSONObject()
+                    .put("worker", "queue")
+                    .put("action", "get").put("taskId", 100_000);
 
+            webSocket.send(jsonObject);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
     private void timeoutError() {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
-                CookieBar.build(activity)
-
-                        .setMessage("Timeout error, server is not responding")
-                        .setDuration(5000)
-                        .setIcon(R.drawable.ic_error_shine)
-                        .setBackgroundColor(R.color.actionErrorShine)
-                        .setCookiePosition(CookieBar.TOP)
-                        .show();
-            }
-        });
 
     }
 
-
-
     public void removeListener(EventListener toRemove) {
-        listeners.remove(toRemove);
+        try {
+            listeners.remove(toRemove);
+        }
+        catch(NullPointerException ignored) { //this operation should be safe
+
+        }
+
+
     }
 
     public WebSocket(SharedPreferences sp , Activity activity, String url){
-        System.out.println("wanting to create");
         this.activity = activity;
         if (webSocketClient == null) {
-            System.out.println("actually creating");
             webSocket = this;
             URI uri;
             try {
@@ -88,7 +91,7 @@ public class WebSocket{
                 webSocketClient = new WebSocketClient(uri) {
                     @Override
                     public void onOpen() {
-                        System.out.println("OPENEEED");
+                        fetchQueue();
                     }
 
                     @Override
@@ -115,11 +118,6 @@ public class WebSocket{
                         }
                     }
 
-
-
-
-
-
                     @Override
                     public void onBinaryReceived(byte[] data) {
                         System.out.println("onBinaryReceived");
@@ -137,7 +135,11 @@ public class WebSocket{
 
                     @Override
                     public void onException(Exception e) {
-                        e.printStackTrace();
+                        if (!(e instanceof UnknownHostException)) {
+                            e.printStackTrace();
+
+                        }
+
                     }
 
                     @Override
@@ -145,36 +147,10 @@ public class WebSocket{
                         System.out.println("ws closed");
                         if (reason==3001) {
                             scheduler.shutdownNow();
+                            activity.runOnUiThread(() -> logoutUser(sp, activity));
 
-                            activity.runOnUiThread(new Runnable() {
-                                public void run() {
-
-                                    CookieBar.build(activity)
-                                            .setMessage("Session expired. Please login again.")
-                                            .setDuration(3000)
-                                            .setBackgroundColor(R.color.infoShine)
-                                            .setCookiePosition(CookieBar.TOP)
-                                            .show();
-                                }
-                            });
-
-                            scheduler = Executors.newScheduledThreadPool(1);
-
-
-                            ScheduledFuture<?> idk = scheduler.schedule(new Runnable() {
-                                @Override
-                                public void run() {
-                                    activity.runOnUiThread(new Runnable() {
-                                        public void run() {
-
-                                            logoutUser(sp, activity);
-                                        }
-                                    });
-                                }
-                            }, 8, TimeUnit.SECONDS);
                         }
                     }
-
                 };
 
                 webSocketClient.setConnectTimeout(10000);
@@ -193,18 +169,11 @@ public class WebSocket{
     }
 
     public void send(JSONObject jsonObject) {
-
-
         webSocketClient.send(jsonObject.toString());
-
-
     }
 
     public void send(String string) {
-
-
         webSocketClient.send(string);
-
 
     }
     public void close() {

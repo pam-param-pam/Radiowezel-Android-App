@@ -223,7 +223,10 @@ final class Cookie extends LinearLayout implements View.OnTouchListener {
             }, duration);
         }
     }
-
+    public void setTitle(String message) {
+        titleTextView.setText(message);
+        System.out.println("set message");
+    }
     public boolean isRemovalInProgress() {
         return isCookieRemovalInProgress;
     }

@@ -53,6 +53,8 @@ dependencies {
     implementation 'com.github.mejdi14:Flat-Dialog-Android:1.0.5'
     implementation 'com.github.sabujak-sabujak:RoundedButton:v0.1.1'
 
+    implementation 'org.imaginativeworld.oopsnointernet:oopsnointernet:2.0.0'
+
     implementation 'com.github.welcome2c:LottieProgressDialog:1.0.1'
     implementation 'com.github.tfaki:ComposableSweetToast:1.0.1'
     implementation 'com.github.aliab:circular-music-progressbar:v1.4.0'

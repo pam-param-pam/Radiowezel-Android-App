@@ -66,7 +66,6 @@ public class PlayerActivity extends YouTubeBaseActivity implements YouTubePlayer
     @Override
     public void onInitializationSuccess(Provider provider, YouTubePlayer player,
                                         boolean restored) {
-        
         //initialise the video player only if it is not restored or is not yet set
         if(!restored){
 

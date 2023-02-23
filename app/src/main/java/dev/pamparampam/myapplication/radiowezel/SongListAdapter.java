@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,7 +18,6 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 
@@ -32,30 +30,24 @@ import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.cookiebar2.OnActionClickListener;
 import dev.pamparampam.myapplication.radiowezel.helper.Functions;
 import dev.pamparampam.myapplication.radiowezel.helper.Responder;
 import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> implements ItemMoveCallback.ItemTouchHelperContract {
-
+public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyViewHolder> implements ItemMoveCallback.ItemTouchHelperContract {
 
     private StartDragListener mStartDragListener;
-
-    private RelativeLayout layout;
-
     private List<Item> mList;
     private WebSocket ws;
     private Activity activity;
     private Context context;
     private SharedPreferences sp;
-    public RecyclerViewAdapter(Context ct, SharedPreferences sp, StartDragListener startDragListener, RelativeLayout layout, List<Item> mList, Activity activity) {
+    public SongListAdapter(Context ct, SharedPreferences sp, StartDragListener startDragListener, List<Item> mList, Activity activity) {
 
         this.mStartDragListener = startDragListener;
         this.sp = sp;
         this.mList = mList;
         this.context = ct;
-        this.layout = layout;
         this.activity = activity;
     }
 
@@ -100,21 +92,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onRowSwiped(int position) {
         // we will delete and also we want to undo
-        String name = mList.get(position).getTitle();
         String id = mList.get(position).getId();
-        System.out.println(position);
-        System.out.println(id);
+
 
         // backup of removed item for undo
         final Item deletedItem = mList.get(position);
-        System.out.println(deletedItem);
-        // remove the item from recyclerview
-
-        // showing snack-bar for undo
-
 
         ws = new WebSocket(sp, activity,Constants.TEST_URL);
-
 
         int taskId = Functions.randInt();
 
@@ -130,22 +114,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 @Override
                 public void receive(String message) throws JSONException {
                     JSONObject obj = new JSONObject(message);
-                    CookieBar.Builder cookieBar = CookieBar.build(activity).setDuration(1500).setCookiePosition(CookieBar.BOTTOM).setTitle(obj.get("info").toString());
+                    CookieBar.Builder cookieBar = CookieBar.build(activity).setDuration(3000).setCookiePosition(CookieBar.BOTTOM).setTitle(obj.get("info").toString());
 
                     switch(obj.get("status").toString()) {
                         case "success":
                             cookieBar.setBackgroundColor(R.color.successShine);
                             cookieBar.setIcon(R.drawable.ic_success_shine);
-                            cookieBar.setAction("UNDO", new OnActionClickListener() {
-                                @Override
-                                public void onClick() {
-                                    CookieBar.dismiss(activity);
-                                    restoreItem(deletedItem, position);
-                                }
+                            cookieBar.setAction("UNDO", () -> {
+                                CookieBar.dismiss(activity);
+                                restoreItem(deletedItem, position);
                             });
-
-
-                        break;
+                            break;
                         case "warning":
                             cookieBar.setBackgroundColor(R.color.warningShine);
                             cookieBar.setIcon(R.drawable.ic_warning_shine);
@@ -153,19 +132,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         case "error":
                             cookieBar.setBackgroundColor(R.color.errorShine);
                             cookieBar.setIcon(R.drawable.ic_error_shine);
-
                             break;
                         default:
                             cookieBar.setBackgroundColor(R.color.actionErrorShine);
                             cookieBar.setIcon(R.drawable.ic_error_retro);
-
                             cookieBar.setMessage("Unexpected, report this.");
                     }
-                    activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            cookieBar.show();
-                        }
-                    });
+                    activity.runOnUiThread(cookieBar::show);
                 }
             };
             ws.addListener(responder, taskId);
@@ -176,19 +149,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             e.printStackTrace();
         }
 
-
     }
 
     @Override
     public void onRowDraw(Canvas c, RecyclerView recyclerView, MyViewHolder myViewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-
     }
 
     @Override
     public void onRowDrawOver(Canvas c, RecyclerView recyclerView, MyViewHolder myViewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-
     }
-
 
     public void removeItem(int position) {
         mList.remove(position);
@@ -208,7 +177,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     .put("extras", new JSONObject().put("videoId", item.getId()).put("position", position));
             Responder responder = new Responder() {
                 @Override
-                public void receive(String message) throws JsonProcessingException, JSONException {
+                public void receive(String message) throws JSONException {
                     JSONObject obj = new JSONObject(message);
                     CookieBar.Builder cookieBar = CookieBar.build(activity).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());
                     switch (obj.get("status").toString()) {
@@ -232,11 +201,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
                             cookieBar.setMessage("Unexpected, report this.");
                     }
-                    activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            cookieBar.show();
-                        }
-                    });
+                    activity.runOnUiThread(cookieBar::show);
                 }
             };
             ws.addListener(responder, taskId);
@@ -309,24 +274,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
                             cookieBar.setMessage("Unexpected, report this.");
                     }
-                    activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            cookieBar.show();
-                        }
-                    });
+                    activity.runOnUiThread(cookieBar::show);
                 }
             };
             ws.addListener(responder, taskId);
             ws.send(jsonObject);
 
-
         } catch (JSONException e) {
             e.printStackTrace();
-
         }
-
     }
-
 
     @Override
     public void onRowSelected(MyViewHolder myViewHolder) {
@@ -338,7 +295,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void onRowClear(MyViewHolder myViewHolder) {
         myViewHolder.cardView.setCardBackgroundColor(Color.WHITE);
     }
-
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 

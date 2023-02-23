@@ -57,6 +57,8 @@
     <string name="Spotify_add">Add with spotify!</string>
     <string name="volume">Volume</string>
     <string name="smooth_pause">Smooth pause</string>
+    <string name="repeat">Toggle repeat </string>
+    <string name="verify_email">Verify email</string>
 
     <string-array name="music_titles">
         <item>1</item>

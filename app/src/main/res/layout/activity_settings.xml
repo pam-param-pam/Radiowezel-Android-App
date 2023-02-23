@@ -94,7 +94,17 @@
         app:backgroundTint="@color/colorPrimary"
         app:layout_constraintBottom_toTopOf="@+id/AS_logout_btn"
         app:layout_constraintStart_toStartOf="parent" />
-
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/AS_verify_email_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/verify_email"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        app:backgroundTint="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/AS_logout_btn"
+        app:layout_constraintStart_toStartOf="parent" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/AS_logout_btn"
         android:layout_width="match_parent"
@@ -124,6 +134,14 @@
         app:layout_constraintBottom_toTopOf="@+id/AS_volume_TEXT"
         app:layout_constraintStart_toStartOf="@+id/AS_volume_bar" />
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/AS_settings_repeat_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/repeat"
+        app:layout_constraintBottom_toTopOf="@+id/AS_settings_smooth_pause_switch"
+        app:layout_constraintStart_toStartOf="@+id/AS_settings_smooth_pause_switch" />
+
     <TextView
         android:id="@+id/AS_volume_TEXT"
         android:layout_width="139dp"
@@ -134,13 +152,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/AS_spotify_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/Spotify_add"
-        app:layout_constraintBottom_toTopOf="@+id/AS_settings_smooth_pause_switch"
-        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

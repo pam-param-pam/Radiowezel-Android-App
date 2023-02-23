@@ -19,6 +19,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.imaginativeworld.oopsnointernet.dialogs.pendulum.NoInternetDialogPendulum;
+
 import java.util.List;
 
 import dev.pamparampam.myapplication.R;
@@ -57,11 +59,10 @@ public class SearchActivity extends AppCompatActivity {
     //adding listeners to required views
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         //calling parent class to recall the app's last state
         super.onCreate(savedInstanceState);
-        Intent i = getIntent();
 
-        ws = (WebSocket) i.getSerializableExtra("WS");
 
         //method to fill the activity that is launched with  the activity_main.xml layout file
         setContentView(R.layout.activity_search);
@@ -73,7 +74,11 @@ public class SearchActivity extends AppCompatActivity {
         //setting title and and style for progress dialog so that users can understand
         //what is happening currently
 
-
+        NoInternetDialogPendulum.Builder builder = new NoInternetDialogPendulum.Builder(
+                this,
+                getLifecycle()
+        );
+        builder.build();
         //Fixing the size of recycler view which means that the size of the view
         //should not change if adapter or children size changes
         mRecyclerView.setHasFixedSize(true);

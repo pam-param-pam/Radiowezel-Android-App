@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.imaginativeworld.oopsnointernet.dialogs.pendulum.NoInternetDialogPendulum;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -39,10 +40,7 @@ public class EmailVerify extends AppCompatActivity {
     private MaterialButton verifyBtn, resendBtn;
     private TextView otpCountDown;
 
-
     private static final String FORMAT = "%02d:%02d";
-
-    Bundle bundle;
 
 
     private SharedPreferences sp;
@@ -56,40 +54,36 @@ public class EmailVerify extends AppCompatActivity {
         resendBtn = findViewById(R.id.AEV_resend_code_btn);
         otpCountDown = findViewById(R.id.AEV_count_down);
 
-        bundle = getIntent().getExtras();
-
-
+        resendBtn.setEnabled(false);
+        NoInternetDialogPendulum.Builder builder = new NoInternetDialogPendulum.Builder(
+                this,
+                getLifecycle()
+        );
+        builder.build();
+        sp = getSharedPreferences("login", MODE_PRIVATE);
+        countDown();
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        listeners();
 
-        init();
     }
-
-    private void init() {
-        sp = getSharedPreferences("login", MODE_PRIVATE);
+    private void listeners() {
         verifyBtn.setOnClickListener(v -> {
             // Hide Keyboard
             Functions.hideSoftKeyboard(EmailVerify.this);
-
             String code = Objects.requireNonNull(textVerifyCode.getEditText()).getText().toString();
-
             if (!code.isEmpty()) {
                 showProgressDialog(EmailVerify.this, "Verifying...");
                 Map<String, String> params = new HashMap<>();
-
                 params.put("code", code);
-
                 makeRequest(new VolleyCallback() {
 
                     @Override
                     public void onSuccess(JSONObject result) {
-                        Intent switchActivityIntent = new Intent(EmailVerify.this, HomeActivity.class);
-
+                        Functions.logoutUser(sp, EmailVerify.this);
+                        Intent switchActivityIntent = new Intent(EmailVerify.this, LoginActivity.class);
                         switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-
                         startActivity(switchActivityIntent);
-
                     }
 
                     @Override
@@ -97,21 +91,16 @@ public class EmailVerify extends AppCompatActivity {
                         if (message.containsKey("code")) {
                             textVerifyCode.setError(String.join("\n", Objects.requireNonNull(message.get("code"))));
                         }
-
                     }
-
                 },OTP_VERIFY_URL, params, true, this, sp);
-
 
             } else {
                 textVerifyCode.setError("Please enter verification code");
             }
         });
 
-        resendBtn.setEnabled(false);
         resendBtn.setOnClickListener(v -> {
             Map<String, String> params = new HashMap<>();
-
             makeRequest(new VolleyCallback() {
 
                 @Override
@@ -120,9 +109,8 @@ public class EmailVerify extends AppCompatActivity {
                             .setTitle("Resend!")
                             .setDuration(1500)
                             .setBackgroundColor(R.color.successShine)
-                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .setCookiePosition(CookieBar.TOP)
                             .show();
-
                 }
 
                 @Override
@@ -131,17 +119,16 @@ public class EmailVerify extends AppCompatActivity {
                             .setTitle("Unexpected, report this.")
                             .setDuration(1500)
                             .setBackgroundColor(R.color.actionErrorShine)
-                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .setCookiePosition(CookieBar.TOP)
                             .show();
-
                 }
 
 
             },Functions.RESEND_VERIFY_MAIL, params, true, this, sp);
         });
 
-        countDown();
     }
+
 
     private void countDown() {
         new CountDownTimer(10000, 1000) { // adjust the milli seconds here
@@ -157,16 +144,6 @@ public class EmailVerify extends AppCompatActivity {
                 resendBtn.setEnabled(true);
             }
         }.start();
-    }
-
-
-
-    private void showDialog(String title) {
-        showProgressDialog(EmailVerify.this, title);
-    }
-
-    private void hideDialog() {
-        Functions.hideProgressDialog(EmailVerify.this);
     }
 
     @Override

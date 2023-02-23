@@ -50,13 +50,9 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         this.activity = activity;
     }
 
-
-
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-
-
 
     // Create new views (invoked by the layout manager)
     @NonNull
@@ -79,7 +75,7 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         final VideoItem singleVideo = mVideoList.get(position);
 
         //replace the default text with id, title and description with setText method
-        holder.video_id.setText("Video ID : "+singleVideo.getId());
+        holder.video_id.setText("Video ID : " + singleVideo.getId());
         holder.video_title.setText(singleVideo.getTitle());
         holder.video_description.setText(singleVideo.getDescription());
 
@@ -111,16 +107,8 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
                         cookieBar.setMessage("Unexpected, report this.");
                 }
-                activity.runOnUiThread(new Runnable() {
-                    public void run() {
-                        cookieBar.show();
-                    }
-                });
-
-
+                activity.runOnUiThread(cookieBar::show);
         }};
-
-
 
         holder.add_new_video_btn.setOnClickListener(v -> {
 
@@ -139,14 +127,11 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
                 ws.send(jsonObject);
 
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-
         });
-
 
         Picasso.get().load(singleVideo.getThumbnailURL()).resize(480,270).centerCrop().into(holder.thumbnail);
 

@@ -6,12 +6,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
+import org.imaginativeworld.oopsnointernet.dialogs.pendulum.NoInternetDialogPendulum;
 import org.json.JSONObject;
 
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
@@ -40,16 +42,20 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
         inputUsername = findViewById(R.id.AR_username_input);
         inputFirstName = findViewById(R.id.AR_first_input_name);
         inputLastName = findViewById(R.id.AR_last_name_input);
         inputEmail = findViewById(R.id.AR_email_input);
         inputPassword = findViewById(R.id.AR_password_input);
         inputRepeatPassword = findViewById(R.id.AR_repeat_password_input);
-
         btnRegister = findViewById(R.id.AR_register_btn);
         btnLinkToLogin = findViewById(R.id.AR_login_btn);
-
+        NoInternetDialogPendulum.Builder builder = new NoInternetDialogPendulum.Builder(
+                this,
+                getLifecycle()
+        );
+        builder.build();
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -70,6 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
             String repeatPassword = Objects.requireNonNull(inputRepeatPassword.getEditText()).getText().toString().trim();
 
             // Check for empty data in the form
+            registerUser("asaSA" + Functions.randInt(), "ssssb", "sadsa", "jedrzej.m"+Functions.randInt()+"@gmail.com", "jedrek06", "jedrek06");
 
             if (!username.isEmpty() && !firstName.isEmpty() && !lastName.isEmpty() && !repeatPassword.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
                 if (Functions.isValidEmailAddress(email)) {
@@ -81,7 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 .setTitle("Passwords are not the same!")
                                 .setDuration(1500)
                                 .setBackgroundColor(R.color.errorShine)
-                                .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                                .setCookiePosition(CookieBar.TOP)
                                 .show();
                     }
                 } else {
@@ -89,7 +96,7 @@ public class RegisterActivity extends AppCompatActivity {
                             .setTitle("Email is not valid!")
                             .setDuration(1500)
                             .setBackgroundColor(R.color.errorShine)
-                            .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                            .setCookiePosition(CookieBar.TOP)
                             .show();
                 }
             } else {
@@ -97,7 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
                         .setTitle("Please enter your details!")
                         .setDuration(1500)
                         .setBackgroundColor(R.color.errorShine)
-                        .setCookiePosition(CookieBar.TOP)  // Cookie will be displayed at the bottom
+                        .setCookiePosition(CookieBar.TOP)
                         .show();
             }
 
@@ -108,10 +115,12 @@ public class RegisterActivity extends AppCompatActivity {
             Intent i = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(i);
             finish();
+
         });
     }
 
     private void registerUser(final String username, final String firstName, final String lastName, final String email, final String password, final String repeatPassword) {
+        showDialog("Registering");
         sp = getSharedPreferences("login", MODE_PRIVATE);
         Map<String, String> params = new HashMap<>();
         params.put("username", username);
@@ -146,8 +155,10 @@ public class RegisterActivity extends AppCompatActivity {
                 String last_name = result.optString("last_name");
                 sp.edit().putString("last_name", last_name).apply();
 
+                boolean email_verified = result.optBoolean("is_email_verified");
+                sp.edit().putBoolean("is_email_verified", email_verified).apply();
 
-                Intent switchActivityIntent = new Intent(RegisterActivity.this, HomeActivity.class);
+                Intent switchActivityIntent = new Intent(RegisterActivity.this, EmailVerify.class);
 
                 switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 finish();
@@ -187,11 +198,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    private void showDialog() {
-        Functions.showProgressDialog(RegisterActivity.this, "Registering ...");
+    private void showDialog(String title) {
+        Functions.showProgressDialog(RegisterActivity.this, title);
     }
 
-    private void hideDialog() {
-        hideProgressDialog(RegisterActivity.this);
-    }
 }

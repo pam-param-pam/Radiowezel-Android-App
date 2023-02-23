@@ -9,6 +9,7 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.StringRes;
+
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,15 @@ public class CookieBar {
     public static Builder build(Activity activity) {
         return new CookieBar.Builder(activity);
     }
+    public static Builder changer(Activity activity) {
+        return new CookieBar.Builder(activity);
+
+
+    }
+    public CookieBar change(Params params) {
+        cookieView.setParams(params);
+        return this;
+    }
 
     public static void dismiss(Activity activity) {
         new CookieBar(activity, null);
@@ -55,6 +65,7 @@ public class CookieBar {
         cookieView.setParams(params);
     }
 
+
     private void show() {
         if (cookieView != null) {
             final ViewGroup decorView = (ViewGroup) context.getWindow().getDecorView();
@@ -66,6 +77,7 @@ public class CookieBar {
             }
         }
     }
+
 
     private void dismiss() {
         final ViewGroup decorView = (ViewGroup) context.getWindow().getDecorView();
@@ -87,7 +99,7 @@ public class CookieBar {
 
     }
 
-    private void addCookie(final ViewGroup parent, final Cookie cookie) {
+    public void addCookie(final ViewGroup parent, final Cookie cookie) {
         if (cookie.getParent() != null) {
             return;
         }
@@ -106,7 +118,7 @@ public class CookieBar {
                         if(dismissListener != null) {
                             dismissListener.onDismiss(DismissType.REPLACE_DISMISS);
                         }
-                        parent.addView(cookie);
+
                     }
                 });
                 return;
@@ -115,6 +127,8 @@ public class CookieBar {
 
         parent.addView(cookie);
     }
+
+
 
     private void removeStaleCookies(ViewGroup parent, int topCookie) {
         for(int i = 0; i < topCookie; i++) {
@@ -132,14 +146,14 @@ public class CookieBar {
     }
 
     public static class Builder {
-
-        private final Params params = new Params();
+        private Params params = new Params();
         private final Activity context;
 
         /**
          * Create a builder for an cookie.
          */
         Builder(Activity activity) {
+
             this.context = activity;
         }
 
@@ -277,6 +291,9 @@ public class CookieBar {
 
         public CookieBar create() {
             return new CookieBar(context, params);
+        }
+        public Params finish() {
+            return params;
         }
 
         public CookieBar show() {
