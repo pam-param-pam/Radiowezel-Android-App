@@ -1,6 +1,9 @@
 package dev.pamparampam.myapplication.radiowezel;
 
 
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.hideProgressDialog;
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.showProgressDialog;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -21,8 +24,8 @@ import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.helper.Functions;
-import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
+import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
+import dev.pamparampam.myapplication.radiowezel.network.WebSocket;
 
 
 public class SearchActivity extends AppCompatActivity {
@@ -200,7 +203,7 @@ public class SearchActivity extends AppCompatActivity {
     private void fillYoutubeVideos() {
         ConstraintLayout layout = findViewById(R.id.CLM);
         //object of YoutubeAdapter which will fill the RecyclerView
-        SharedPreferences sp = getSharedPreferences("login", MODE_PRIVATE);
+        SharedPreferences sp = MyApplication.getInstance().getSP();
 
         youtubeAdapter = new YoutubeAdapter(layout, getApplicationContext(), searchResults, sp, SearchActivity.this);
 
@@ -212,10 +215,10 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void showDialog(String dialog) {
-        Functions.showProgressDialog(SearchActivity.this, dialog);
+        showProgressDialog(SearchActivity.this, dialog);
     }
 
     private void hideDialog() {
-        Functions.hideProgressDialog(SearchActivity.this);
+        hideProgressDialog(SearchActivity.this);
     }
 }

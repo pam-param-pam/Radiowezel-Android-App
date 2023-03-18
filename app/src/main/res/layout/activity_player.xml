@@ -40,11 +40,5 @@
         android:maxLines="15"
         android:layout_margin="10dp" />
 
-    <ImageButton
-        android:id="@+id/AP_add_new_video_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_input_add"
-        android:contentDescription="@string/todo" />
 
 </LinearLayout>

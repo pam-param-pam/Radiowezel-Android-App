@@ -1,9 +1,11 @@
 package dev.pamparampam.myapplication.radiowezel;
 
-import static dev.pamparampam.myapplication.radiowezel.helper.Functions.makeRequest;
-import static dev.pamparampam.myapplication.radiowezel.helper.Functions.showProgressDialog;
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.isValidEmailAddress;
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.randInt;
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.showProgressDialog;
+import static dev.pamparampam.myapplication.radiowezel.network.NetworkManager.makeRequest;
 
-import android.content.Intent;
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -35,9 +37,9 @@ import java.util.Objects;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.helper.Functions;
-import dev.pamparampam.myapplication.radiowezel.helper.Responder;
-import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
+import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
+import dev.pamparampam.myapplication.radiowezel.network.Responder;
+import dev.pamparampam.myapplication.radiowezel.network.WebSocket;
 
 
 public class SettingsActivity extends AppCompatActivity {
@@ -53,7 +55,6 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sp = getSharedPreferences("login", MODE_PRIVATE);
 
         setContentView(R.layout.activity_settings);
 
@@ -69,7 +70,7 @@ public class SettingsActivity extends AppCompatActivity {
         btnLogout = findViewById(R.id.AS_logout_btn);
 
         smoothPauseSwitch = findViewById(R.id.AS_settings_smooth_pause_switch);
-
+        sp = MyApplication.getInstance().getSP();
         boolean smoothPause = sp.getBoolean("smoothPause", false);
         smoothPauseSwitch.setChecked(smoothPause);
 
@@ -79,7 +80,7 @@ public class SettingsActivity extends AppCompatActivity {
         );
         builder.build();
 
-        ws = new WebSocket(sp, SettingsActivity.this, Constants.PLAYER_URL);
+        ws = WebSocket.getInstance(SettingsActivity.this);
 
         // Hide Keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -113,10 +114,6 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void receive(String message) throws JsonProcessingException, JSONException {
                 CookieBar.dismiss(SettingsActivity.this);
-
-                super.receive(message);
-                System.out.println(message);
-
                 JSONObject obj = new JSONObject(message);
                 CookieBar.Builder cookieBar = CookieBar.build(SettingsActivity.this).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());
                 switch(obj.get("status").toString()) {
@@ -161,7 +158,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                int taskId = Functions.randInt();
+                int taskId = randInt();
                 JSONObject jsonObject;
                 try {
                     jsonObject = new JSONObject()
@@ -185,13 +182,30 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         emailVerify.setOnClickListener(v -> {
-            Intent switchActivityIntent = new Intent(SettingsActivity.this, EmailVerify.class);
+            Map<String, String> params = new HashMap<>();
+            NetworkManager.makeRequest(new VolleyCallback() {
+                @Override
+                public void onSuccess(JSONObject result) {
+                    CookieBar.build(SettingsActivity.this)
+                            .setTitle("A verify email was sent!")
+                            .setDuration(3000)
+                            .setBackgroundColor(R.color.infoShine)
+                            .setCookiePosition(CookieBar.TOP)
+                            .show();
 
-            startActivity(switchActivityIntent);
+
+                }
+
+                @Override
+                public void onError(int code, Map<String, ArrayList<String>> message) {
+
+                }
+            },NetworkManager.RESEND_VERIFY_MAIL, params, true, SettingsActivity.this);
+
         });
 
         repeatSwitch.setOnClickListener(v -> {
-            int taskId = Functions.randInt();
+            int taskId = randInt();
 
             JSONObject jsonObject;
             try {
@@ -212,7 +226,7 @@ public class SettingsActivity extends AppCompatActivity {
         lastName.setOnClickListener(v -> changeInfoDialog("Last Name", "last_name"));
 
 
-        btnLogout.setOnClickListener(v -> logoutUser());
+        btnLogout.setOnClickListener(v -> logoutUser(SettingsActivity.this));
 
         btnChangePassword.setOnClickListener(v -> {
 
@@ -325,7 +339,7 @@ public class SettingsActivity extends AppCompatActivity {
                 String new_email = newEmail.getEditText().getText().toString();
 
                 if (!old_pass.isEmpty() && !new_email.isEmpty()) {
-                    if (Functions.isValidEmailAddress(new_email)) {
+                    if (isValidEmailAddress(new_email)) {
                         changeEmail(old_pass, new_email, alertDialog, password, newEmail);
                     }
                     else {
@@ -356,7 +370,7 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     private void fetchRepeat() {
-        int taskId = Functions.randInt();
+        int taskId = randInt();
 
         JSONObject jsonObject;
         try {
@@ -381,7 +395,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
     private void fetchVolume() {
-        int taskId = Functions.randInt();
+        int taskId = randInt();
 
         JSONObject jsonObject;
         try {
@@ -460,7 +474,6 @@ public class SettingsActivity extends AppCompatActivity {
     private void changeInfo(String type, String newValue, TextInputLayout mEditInfo, AlertDialog alertDialog) {
         showProgressDialog(SettingsActivity.this, "Changing...");
 
-        sp = getSharedPreferences("login", MODE_PRIVATE);
         Map<String, String> params = new HashMap<>();
         params.put(type, newValue);
 
@@ -491,16 +504,15 @@ public class SettingsActivity extends AppCompatActivity {
                     mEditInfo.setError(String.join("\n", Objects.requireNonNull(message.get("username"))));
                 }
             }
-        },Functions.CHANGE_INFO, params, true, this, sp);
+        }, NetworkManager.CHANGE_INFO, params, true, this);
 
     }
-    private void logoutUser() {
-        sp = getSharedPreferences("login", MODE_PRIVATE);
-        Functions.logoutUser(sp, SettingsActivity.this);
+    private void logoutUser(Activity activity) {
+        NetworkManager.logoutUser(activity);
     }
 
     private void changePassword(String old_pass, String new_pass, AlertDialog dialog, TextInputLayout newPassword, TextInputLayout oldPassword) {
-        sp = getSharedPreferences("login", MODE_PRIVATE);
+
         showProgressDialog(SettingsActivity.this, "Changing...");
         Map<String, String> params = new HashMap<>();
 
@@ -534,12 +546,11 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
 
-        },Functions.CHANGE_PASSWORD, params, true, this, sp);
+        }, NetworkManager.CHANGE_PASSWORD, params, true, this);
 
     }
 
     private void changeEmail(String passwordTxt, String new_email, AlertDialog dialog, TextInputLayout password, TextInputLayout newEmail) {
-        sp = getSharedPreferences("login", MODE_PRIVATE);
         showProgressDialog(SettingsActivity.this, "Changing...");
         Map<String, String> params = new HashMap<>();
 
@@ -554,10 +565,12 @@ public class SettingsActivity extends AppCompatActivity {
                 sp.edit().putString("email", new_email).apply();
                 refreshSetting();
                 dialog.dismiss();
-                Intent switchActivityIntent = new Intent(SettingsActivity.this, EmailVerify.class);
-                switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                finish();
-                startActivity(switchActivityIntent);
+                CookieBar.build(SettingsActivity.this)
+                        .setTitle("A verify email was sent to " + new_email + "!")
+                        .setDuration(3000)
+                        .setBackgroundColor(R.color.infoShine)
+                        .setCookiePosition(CookieBar.TOP)
+                        .show();
             }
 
             @Override
@@ -571,7 +584,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
 
-        }, Functions.CHANGE_EMAIL, params, false, this, sp);
+        }, NetworkManager.CHANGE_EMAIL, params, false, this);
 
     }
     public void refreshSetting() {

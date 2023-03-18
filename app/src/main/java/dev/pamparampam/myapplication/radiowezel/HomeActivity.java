@@ -9,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,8 +33,10 @@ import java.util.List;
 import java.util.Locale;
 
 import dev.pamparampam.myapplication.R;
-import dev.pamparampam.myapplication.radiowezel.helper.Responder;
-import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
+import dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions;
+import dev.pamparampam.myapplication.radiowezel.network.Responder;
+import dev.pamparampam.myapplication.radiowezel.network.WebSocket;
 
 
 public class HomeActivity extends AppCompatActivity implements StartDragListener {
@@ -126,8 +127,8 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         positionTxt.setPaintFlags(0);
         lengthTxt.setPaintFlags(0);
         title .setPaintFlags(0);
-
-
+        sp = MyApplication.getInstance().getSP();
+        ws = WebSocket.getInstance(HomeActivity.this);
         connect();
         listeners();
         buildRecyclerView();
@@ -143,15 +144,13 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         ws.fetchQueue();
 
         if(list == null){
-            RelativeLayout layout = findViewById(R.id.RLM);
 
             list = new ArrayList<>();
 
             Item item = new Item("https://img.freepik.com/premium-vector/system-software-update-upgrade-concept-loading-process-screen-vector-illustration_175838-2182.jpg?w=2000", "Loading...","ID", "CEO OF SLOW INTERNET", "LENGTH");
             list.add(item);
-            sp = getSharedPreferences("login", MODE_PRIVATE);
 
-            mAdapter = new SongListAdapter(this, sp, this, list, HomeActivity.this);
+            mAdapter = new SongListAdapter(this, this, list, HomeActivity.this);
             ItemTouchHelper.Callback callback = new ItemMoveCallback(mAdapter);
 
             touchHelper = new ItemTouchHelper(callback);
@@ -164,6 +163,55 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
 
 
     }
+    Responder responder = new Responder() {
+        @Override
+        public void receive(String message) throws JsonProcessingException, JSONException {
+            CookieBar.dismiss(HomeActivity.this);
+
+            super.receive(message);
+            System.out.println(message);
+
+            JSONObject obj = new JSONObject(message);
+            CookieBar.Builder cookieBar = CookieBar.build(HomeActivity.this).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());
+            switch(obj.get("status").toString()) {
+                case "success":
+                    cookieBar.setBackgroundColor(R.color.successShine);
+                    cookieBar.setIcon(R.drawable.ic_success_shine);
+                    break;
+                case "warning":
+                    cookieBar.setBackgroundColor(R.color.warningShine);
+                    cookieBar.setIcon(R.drawable.ic_warning_shine);
+
+                    break;
+                case "info":
+                    cookieBar.setBackgroundColor(R.color.infoShine);
+                    cookieBar.setIcon(R.drawable.ic_info_shine);
+
+                    break;
+                case "error":
+                    cookieBar.setBackgroundColor(R.color.errorShine);
+                    cookieBar.setIcon(R.drawable.ic_error_shine);
+
+                    break;
+                default:
+                    cookieBar.setBackgroundColor(R.color.actionErrorShine);
+                    cookieBar.setIcon(R.drawable.ic_error_retro);
+
+                    cookieBar.setMessage("Unexpected, report this.");
+            }
+
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    cookieBar.show();
+
+                }
+            });
+
+        }
+    };
 
     private void listeners() {
         settingsBtn.setOnClickListener(v -> {
@@ -174,21 +222,122 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
         });
         searchBtn.setOnClickListener(v -> {
             Intent i = new Intent(HomeActivity.this, SearchActivity.class);
-
             startActivity(i);
             overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 
         });
+        positionBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int taskId = Functions.randInt();
+
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject()
+                            .put("worker", "player")
+                            .put("action", "seek").put("extras", new JSONObject()
+                                    .put("seconds", seekBar.getProgress()))
+                            .put("taskId", taskId);
+                    ws.addListener(responder, taskId);
+
+                    ws.send(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+        playBtn.setOnClickListener(v -> {
+            int taskId = Functions.randInt();
+
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject()
+                        .put("worker", "player")
+                        .put("action", "play")
+                        .put("taskId", taskId);
+                ws.addListener(responder, taskId);
+
+                ws.send(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        pauseBtn.setOnClickListener(v -> {
+            int taskId = Functions.randInt();
+            boolean smoothPause = sp.getBoolean("smoothPause", false);
+            if (smoothPause) {
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject()
+                            .put("worker", "player")
+                            .put("action", "smooth_pause")
+                            .put("taskId", taskId);
+                    ws.addListener(responder, taskId);
+                    ws.send(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                JSONObject jsonObject;
+                try {
+                    jsonObject = new JSONObject()
+                            .put("worker", "player")
+                            .put("action", "pause")
+                            .put("taskId", taskId);
+                    ws.addListener(responder, taskId);
+                    ws.send(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
+
+        });
+
+        nextBtn.setOnClickListener(v -> {
+            int taskId = Functions.randInt();
+
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject()
+                        .put("worker", "player")
+                        .put("action", "next")
+                        .put("taskId", taskId);
+                ws.addListener(responder, taskId);
+                ws.send(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
-    private void connect() {
-        sp = getSharedPreferences("login",MODE_PRIVATE);
 
-        ws = new WebSocket(sp, HomeActivity.this, Constants.PLAYER_URL);
+
+    private void connect() {
+
         /* global listener */
         ws.addListener(new Responder() {
             @Override
-            public void receive(String message) throws JsonProcessingException, JSONException {
+            public void receive(String message) throws JsonProcessingException {
                 try {
                     JSONObject obj = new JSONObject(message);
                     String pos = obj.getString("pos");
@@ -258,6 +407,7 @@ public class HomeActivity extends AppCompatActivity implements StartDragListener
     @Override
     public void onResume() {
         super.onResume();
+        ws.fetchPosition();
         ws.fetchQueue();
     }
 

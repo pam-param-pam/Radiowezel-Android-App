@@ -1,5 +1,9 @@
 package dev.pamparampam.myapplication.radiowezel;
 
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.hideSoftKeyboard;
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.isValidEmailAddress;
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.showProgressDialog;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,7 +24,7 @@ import java.util.Objects;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.helper.Functions;
+import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -47,6 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
         inputRepeatPassword = findViewById(R.id.AR_repeat_password_input);
         btnRegister = findViewById(R.id.AR_register_btn);
         btnLinkToLogin = findViewById(R.id.AR_login_btn);
+        sp = MyApplication.getInstance().getSP();
         NoInternetDialogPendulum.Builder builder = new NoInternetDialogPendulum.Builder(
                 this,
                 getLifecycle()
@@ -62,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
         // Login button Click Event
         btnRegister.setOnClickListener(view -> {
             // Hide Keyboard
-            Functions.hideSoftKeyboard(RegisterActivity.this);
+            hideSoftKeyboard(RegisterActivity.this);
 
             String username = Objects.requireNonNull(inputUsername.getEditText()).getText().toString().trim();
             String firstName = Objects.requireNonNull(inputFirstName.getEditText()).getText().toString().trim();
@@ -74,7 +79,7 @@ public class RegisterActivity extends AppCompatActivity {
             // Check for empty data in the form
 
             if (!username.isEmpty() && !firstName.isEmpty() && !lastName.isEmpty() && !repeatPassword.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
-                if (Functions.isValidEmailAddress(email)) {
+                if (isValidEmailAddress(email)) {
                     if (password.equals(repeatPassword)) {
                         registerUser(username, firstName, lastName, email, password, repeatPassword);
                     }
@@ -116,7 +121,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void registerUser(final String username, final String firstName, final String lastName, final String email, final String password, final String repeatPassword) {
         showDialog("Registering");
-        sp = getSharedPreferences("login", MODE_PRIVATE);
         Map<String, String> params = new HashMap<>();
         params.put("username", username);
         params.put("first_name", firstName);
@@ -124,40 +128,17 @@ public class RegisterActivity extends AppCompatActivity {
         params.put("email", email);
         params.put("password", password);
         params.put("repeatPassword", repeatPassword);
-        Functions.makeRequest(new VolleyCallback() {
+        NetworkManager.makeRequest(new VolleyCallback() {
             @Override
             public void onSuccess(JSONObject result) {
-                String token = result.optString("access");
-                sp.edit().putString("token", token).apply();
 
-                String refresh = result.optString("refresh");
-                sp.edit().putString("refresh", refresh).apply();
+                CookieBar.build(RegisterActivity.this)
+                        .setTitle("A verify email was sent! Verify it first and then login.")
+                        .setDuration(3000)
+                        .setBackgroundColor(R.color.infoShine)
+                        .setCookiePosition(CookieBar.TOP)
+                        .show();
 
-                sp.edit().putBoolean("logged", true).apply();
-
-                int lifetime = result.optInt("lifetime");
-                sp.edit().putInt("token_lifetime", lifetime).apply();
-
-                String username = result.optString("username");
-                sp.edit().putString("username", username).apply();
-
-                String email = result.optString("email");
-                sp.edit().putString("email", email).apply();
-
-                String first_name = result.optString("first_name");
-                sp.edit().putString("first_name", first_name).apply();
-
-                String last_name = result.optString("last_name");
-                sp.edit().putString("last_name", last_name).apply();
-
-                boolean email_verified = result.optBoolean("is_email_verified");
-                sp.edit().putBoolean("is_email_verified", email_verified).apply();
-
-                Intent switchActivityIntent = new Intent(RegisterActivity.this, EmailVerify.class);
-
-                switchActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                finish();
-                startActivity(switchActivityIntent);
             }
 
             @Override
@@ -189,12 +170,12 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
             }
-        },Functions.REGISTER_URL, params, false, this, sp);
+        }, NetworkManager.REGISTER_URL, params, false, this);
 
     }
 
     private void showDialog(String title) {
-        Functions.showProgressDialog(RegisterActivity.this, title);
+        showProgressDialog(RegisterActivity.this, title);
     }
 
 }

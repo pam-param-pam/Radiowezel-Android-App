@@ -2,6 +2,8 @@ package dev.pamparampam.myapplication.radiowezel;
 
 
 
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.randInt;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,9 +31,9 @@ import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.helper.Functions;
-import dev.pamparampam.myapplication.radiowezel.helper.Responder;
-import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
+import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
+import dev.pamparampam.myapplication.radiowezel.network.Responder;
+import dev.pamparampam.myapplication.radiowezel.network.WebSocket;
 
 public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyViewHolder> implements ItemMoveCallback.ItemTouchHelperContract {
 
@@ -40,14 +42,13 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyView
     private WebSocket ws;
     private Activity activity;
     private Context context;
-    private SharedPreferences sp;
-    public SongListAdapter(Context ct, SharedPreferences sp, StartDragListener startDragListener, List<Item> mList, Activity activity) {
+    public SongListAdapter(Context ct, StartDragListener startDragListener, List<Item> mList, Activity activity) {
 
         this.mStartDragListener = startDragListener;
-        this.sp = sp;
         this.mList = mList;
         this.context = ct;
         this.activity = activity;
+
     }
 
     @NonNull
@@ -97,9 +98,9 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyView
         // backup of removed item for undo
         final Item deletedItem = mList.get(position);
 
-        ws = new WebSocket(sp, activity,Constants.PLAYER_URL);
+        ws = WebSocket.getInstance(activity);
 
-        int taskId = Functions.randInt();
+        int taskId = randInt();
 
         JSONObject jsonObject;
         try {
@@ -165,8 +166,8 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyView
     }
 
     public void restoreItem(Item item, int position) {
-        ws = new WebSocket(sp,activity, Constants.PLAYER_URL);
-        int taskId = Functions.randInt();
+        ws = WebSocket.getInstance(activity);
+        int taskId = randInt();
         JSONObject jsonObject;
         try {
             jsonObject = new JSONObject()
@@ -237,9 +238,9 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.MyView
         }
         notifyItemMoved(fromPosition, toPosition);
 
-        ws = new WebSocket(sp, activity,Constants.PLAYER_URL);
+        ws = WebSocket.getInstance(activity);
 
-        int taskId = Functions.randInt();
+        int taskId = randInt();
         JSONObject jsonObject;
         try {
             jsonObject = new JSONObject()

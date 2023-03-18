@@ -181,13 +181,10 @@ final class Cookie extends LinearLayout implements View.OnTouchListener {
         if (actionButton != null && !TextUtils.isEmpty(params.action) && actionClickListener != null) {
             actionButton.setVisibility(VISIBLE);
             actionButton.setText(params.action);
-            actionButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    actionClickListener.onClick();
-                    actionClickDismiss = true;
-                    dismiss();
-                }
+            actionButton.setOnClickListener(view -> {
+                actionClickListener.onClick();
+                actionClickDismiss = true;
+                dismiss();
             });
 
             if (params.actionColor != 0) {

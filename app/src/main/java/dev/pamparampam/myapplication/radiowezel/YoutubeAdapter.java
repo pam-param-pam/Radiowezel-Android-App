@@ -1,5 +1,7 @@
 package dev.pamparampam.myapplication.radiowezel;
 
+import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions.randInt;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -26,9 +27,9 @@ import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.helper.Functions;
-import dev.pamparampam.myapplication.radiowezel.helper.Responder;
-import dev.pamparampam.myapplication.radiowezel.helper.WebSocket;
+import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
+import dev.pamparampam.myapplication.radiowezel.network.Responder;
+import dev.pamparampam.myapplication.radiowezel.network.WebSocket;
 
 
 //Adapter class for RecyclerView of videos
@@ -113,8 +114,8 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
         holder.add_new_video_btn.setOnClickListener(v -> {
 
 
-            ws = new WebSocket(sp, activity,Constants.PLAYER_URL);
-            int taskId = Functions.randInt();
+            ws = WebSocket.getInstance(activity);
+            int taskId = randInt();
             ws.addListener(responder, taskId);
             JSONObject jsonObject;
             try {
