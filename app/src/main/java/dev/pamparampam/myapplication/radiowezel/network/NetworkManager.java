@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +29,7 @@ import java.util.Map;
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.LoginActivity;
 import dev.pamparampam.myapplication.radiowezel.MyApplication;
+import dev.pamparampam.myapplication.radiowezel.RegisterActivity;
 import dev.pamparampam.myapplication.radiowezel.VolleyCallback;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
 
@@ -102,7 +102,10 @@ public class NetworkManager extends AppCompatActivity{
                 }
                 Activity activity = (Activity) ct;
                 if (statusCode == 401) {
-                    refreshToken(callback, URL, params, isTokenNeeded, ct);
+                    if (!(activity instanceof RegisterActivity || activity instanceof LoginActivity)) {
+                        refreshToken(callback, URL, params, isTokenNeeded, ct);
+
+                    }
                 }
                 if (statusCode == 500) {
                     CookieBar.build(activity)

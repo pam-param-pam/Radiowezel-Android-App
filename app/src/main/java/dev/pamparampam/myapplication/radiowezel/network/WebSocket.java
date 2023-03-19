@@ -1,6 +1,5 @@
 package dev.pamparampam.myapplication.radiowezel.network;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
@@ -15,12 +14,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import dev.pamparampam.myapplication.radiowezel.Constants;
 import dev.pamparampam.myapplication.radiowezel.MyApplication;
 import dev.pamparampam.myapplication.radiowezel.VolleyCallback;
-import dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Functions;
 import dev.pamparampam.myapplication.radiowezel.websocketclient.WebSocketClient;
 
 

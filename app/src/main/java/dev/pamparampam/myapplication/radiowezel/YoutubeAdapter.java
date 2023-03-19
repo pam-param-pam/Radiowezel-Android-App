@@ -27,7 +27,6 @@ import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
 import dev.pamparampam.myapplication.radiowezel.network.Responder;
 import dev.pamparampam.myapplication.radiowezel.network.WebSocket;
 
@@ -43,11 +42,11 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
     private Activity activity;
     //Parameterised Constructor to save the Activity context and video list
     //helps in initializing a object for this class
-    public YoutubeAdapter(ConstraintLayout layout, Context mContext, List<VideoItem> mVideoList, SharedPreferences sp, Activity activity) {
+    public YoutubeAdapter(ConstraintLayout layout, Context mContext, List<VideoItem> mVideoList, Activity activity) {
         this.mContext = mContext;
         this.mVideoList = mVideoList;
         this.layout = layout;
-        this.sp = sp;
+
         this.activity = activity;
     }
 

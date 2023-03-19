@@ -24,7 +24,6 @@ import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
 import dev.pamparampam.myapplication.radiowezel.network.WebSocket;
 
 
@@ -205,7 +204,7 @@ public class SearchActivity extends AppCompatActivity {
         //object of YoutubeAdapter which will fill the RecyclerView
         SharedPreferences sp = MyApplication.getInstance().getSP();
 
-        youtubeAdapter = new YoutubeAdapter(layout, getApplicationContext(), searchResults, sp, SearchActivity.this);
+        youtubeAdapter = new YoutubeAdapter(layout, getApplicationContext(), searchResults, SearchActivity.this);
 
         //setAdapter to RecyclerView
         mRecyclerView.setAdapter(youtubeAdapter);

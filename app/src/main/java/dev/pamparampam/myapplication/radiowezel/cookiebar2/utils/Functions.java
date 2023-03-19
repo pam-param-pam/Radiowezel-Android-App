@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentManager;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import dev.pamparampam.myapplication.radiowezel.MyApplication;
 import dev.pamparampam.myapplication.radiowezel.widget.ProgressBarDialog;
 
 public class Functions {

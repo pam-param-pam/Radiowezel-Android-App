@@ -112,7 +112,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         Responder responder = new Responder() {
             @Override
-            public void receive(String message) throws JsonProcessingException, JSONException {
+            public void receive(String message) throws JSONException {
                 CookieBar.dismiss(SettingsActivity.this);
                 JSONObject obj = new JSONObject(message);
                 CookieBar.Builder cookieBar = CookieBar.build(SettingsActivity.this).setDuration(1500).setCookiePosition(CookieBar.TOP).setTitle(obj.get("info").toString());

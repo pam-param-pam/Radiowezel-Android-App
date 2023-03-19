@@ -35,7 +35,6 @@ import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
 public class LoginActivity extends AppCompatActivity {
 
     private SharedPreferences sp;
-    private AlertDialog alertDialog;
     private MaterialButton btnLogin, btnLinkToRegister, btnForgotPass;
     private TextInputLayout inputEmail, inputPassword;
     private static LoginActivity instance;
@@ -132,7 +131,7 @@ public class LoginActivity extends AppCompatActivity {
                 String email = mEditEmail.getEditText().getText().toString();
                 if (!email.isEmpty()) {
                     if (isValidEmailAddress(email)) {
-                        reset(sp, email, alertDialog, mEditEmail);
+                        reset(email, alertDialog, mEditEmail);
                     } else {
                         CookieBar.build(LoginActivity.this)
                                 .setTitle("Email is not valid!")
@@ -155,7 +154,7 @@ public class LoginActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void reset(SharedPreferences sp, String email, AlertDialog alertDialog, TextInputLayout mEditEmail) {
+    private void reset(String email, AlertDialog alertDialog, TextInputLayout mEditEmail) {
         showProgressDialog(LoginActivity.this, "Sending email...");
         Map<String, String> params = new HashMap<>();
         params.put("email", email);

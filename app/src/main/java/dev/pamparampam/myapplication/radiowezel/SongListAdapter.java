@@ -6,7 +6,6 @@ import static dev.pamparampam.myapplication.radiowezel.cookiebar2.utils.Function
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -31,7 +30,6 @@ import java.util.List;
 
 import dev.pamparampam.myapplication.R;
 import dev.pamparampam.myapplication.radiowezel.cookiebar2.CookieBar;
-import dev.pamparampam.myapplication.radiowezel.network.NetworkManager;
 import dev.pamparampam.myapplication.radiowezel.network.Responder;
 import dev.pamparampam.myapplication.radiowezel.network.WebSocket;
 
